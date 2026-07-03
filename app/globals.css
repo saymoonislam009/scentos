@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background-color: #050505;
+    color: #EDEAE3;
+  }
+  ::selection {
+    background-color: #4F8CFF;
+    color: #050505;
+  }
+  :focus-visible {
+    outline: 2px solid #C9A24B;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .glass {
+    background: rgba(21, 21, 26, 0.55);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(237, 234, 227, 0.08);
+  }
+  .hairline {
+    border: 1px solid rgba(237, 234, 227, 0.10);
+  }
+  .input {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(237, 234, 227, 0.12);
+    background: rgba(237, 234, 227, 0.04);
+    padding: 0.75rem 1rem;
+    color: #EDEAE3;
+  }
+  .input:focus {
+    border-color: #C9A24B;
+    outline: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
