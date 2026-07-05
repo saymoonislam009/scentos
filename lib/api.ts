@@ -25,7 +25,8 @@ export const api = {
     adminRequest<any>('/api/admin/fragrances', secret, { method: 'POST', body: JSON.stringify(body) }),
   adminUpdateFragrance: (id: string, body: Record<string, unknown>, secret: string) =>
     adminRequest<any>(`/api/admin/fragrances/${id}`, secret, { method: 'PATCH', body: JSON.stringify(body) }),
-  adminDeleteFragrance: (id: string, secret: string) => adminRequest<any>(`/api/admin/fragrances/${id}`, secret, { method: 'DELETE' }),
+  adminDeleteFragrance: (id: string, secret: string) =>
+    adminRequest<any>(`/api/admin/fragrances/${id}`, secret, { method: 'DELETE' }),
   adminListOrders: (secret: string) => adminRequest<any[]>('/api/admin/orders', secret),
   adminListUsers: (secret: string) => adminRequest<any[]>('/api/admin/users', secret),
   adminListPartialListings: (secret: string) => adminRequest<any[]>('/api/admin/partial-listings', secret),

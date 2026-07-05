@@ -9,21 +9,21 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const body = await req.json();
   const admin = createAdminClient();
 
-  // toggle-discontinued comes through as a body flag rather than a
-  // separate route, to keep the admin route surface small.
   if (body.toggleDiscontinued) {
     const { data: current } = await admin.from('fragrances').select('discontinued').eq('id', params.id).single();
-    const { data, error } = await admin
-      .from('fragrances')
+    const { data, error } = await admin.from('fragrances')
       .update({ discontinued: !current?.discontinued })
-      .eq('id', params.id)
-      .select()
-      .single();
+      .eq('id', params.id).select().single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json(data);
   }
 
-  const { data, error } = await admin.from('fragrances').update(body).eq('id', params.id).select().single();
+  // Sanitise body — only allow known fields through
+  const allowed: Record<string, any> = {};
+  const fields = ['name', 'description', 'concentration', 'release_year', 'price_tier_usd', 'seasons', 'occasions', 'hero_image_url', 'discontinued'];
+  for (const f of fields) if (body[f] !== undefined) allowed[f] = body[f];
+
+  const { data, error } = await admin.from('fragrances').update(allowed).eq('id', params.id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
