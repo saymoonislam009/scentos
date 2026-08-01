@@ -1,15 +1,6 @@
 'use client';
-
 import { useEffect } from 'react';
-
 export function ServiceWorkerRegistrar() {
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {
-        // Non-fatal — the app works fine without offline support.
-      });
-    }
-  }, []);
-
+  useEffect(() => { if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {}); }, []);
   return null;
 }

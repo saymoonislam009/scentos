@@ -1,37 +1,18 @@
 'use client';
-
-type NoteGroup = { top: string[]; mid: string[]; base: string[] };
-
-export function NotePyramid({ notes }: { notes: { position: string; notes: { name: string } | null }[] }) {
-  const groups: NoteGroup = { top: [], mid: [], base: [] };
-  for (const n of notes) {
-    const name = n.notes?.name;
-    if (!name) continue;
-    if (n.position === 'top') groups.top.push(name);
-    else if (n.position === 'mid') groups.mid.push(name);
-    else groups.base.push(name);
-  }
-
-  const row = (label: string, items: string[], color: string) =>
-    items.length > 0 ? (
-      <div key={label} className="flex gap-4">
-        <div className="w-16 shrink-0 pt-1 text-right text-xs uppercase tracking-wider text-ash">{label}</div>
-        <div className="flex flex-wrap gap-2">
-          {items.map((name) => (
-            <span key={name}
-              className={`rounded-full border px-3 py-1 text-xs ${color}`}>
-              {name}
-            </span>
-          ))}
-        </div>
-      </div>
-    ) : null;
-
+export function NotePyramid({ notes }:{ notes:{ position:string; notes:{ name:string }|null }[] }) {
+  const top:string[]=[],mid:string[]=[],base:string[]=[];
+  for(const n of notes){ const name=n.notes?.name; if(!name) continue; if(n.position==='top') top.push(name); else if(n.position==='mid') mid.push(name); else base.push(name); }
+  const Row=({ label, items, color }:{ label:string; items:string[]; color:string })=>items.length===0?null:(
+    <div className="flex items-start gap-4">
+      <span className={`mt-0.5 w-10 shrink-0 text-right font-mono text-2xs uppercase tracking-wider ${color}`}>{label}</span>
+      <div className="flex flex-wrap gap-1.5">{items.map(name=><span key={name} className="note-pill">{name}</span>)}</div>
+    </div>
+  );
   return (
     <div className="space-y-3">
-      {row('Top', groups.top, 'border-electric/30 bg-electric/5 text-bone')}
-      {row('Heart', groups.mid, 'border-gold/30 bg-gold/5 text-bone')}
-      {row('Base', groups.base, 'border-bone/20 bg-bone/5 text-bone')}
+      <Row label="Top" items={top} color="text-electric"/>
+      <Row label="Heart" items={mid} color="text-gold"/>
+      <Row label="Base" items={base} color="text-ash"/>
     </div>
   );
 }
