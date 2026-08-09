@@ -8,6 +8,7 @@ import { DnaRadarChart } from '@/components/DnaRadarChart';
 import { AccordBars } from '@/components/fragrance/AccordBars';
 import { NotePyramid } from '@/components/fragrance/NotePyramid';
 import { SeasonBadges, OccasionBadges, PerfStat } from '@/components/fragrance/FragranceBadges';
+import { PriceAlertButton } from '@/components/PriceAlertButton';
 
 const PROJ: Record<string,string> = { intimate:'Intimate', moderate:'Moderate', strong:'Strong', 'beast-mode':'Beast mode' };
 
@@ -70,6 +71,7 @@ export default function FragrancePage({ params }: { params: { slug: string } }) 
       }
       if (!active) return;
       setF(frag); setBrand(br); setDna(d); setNotes(n ?? []); setAccords(a ?? []); setReviews(r ?? []); setGenome(eg); setLoading(false);
+      if (user) fetch('/api/recently-viewed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fragranceId: frag.id }) }).catch(() => {});
     })();
     return () => { active = false; };
   }, [params.slug, user]);
@@ -142,7 +144,10 @@ export default function FragrancePage({ params }: { params: { slug: string } }) 
               </div>
             )
           ) : <Link href="/sign-in" className="btn-ghost text-sm"><Heart size={14} />Sign in to collect</Link>}
-          {deals.length > 0 && <a href={deals[0].url} target="_blank" rel="noreferrer" className="btn-ghost text-xs"><ShoppingBag size={12} />From ${Number(deals[0].price).toFixed(2)} at {deals[0].retailer}<ExternalLink size={10} /></a>}
+          <div className="flex items-center gap-2">
+            {deals.length > 0 && <a href={deals[0].url} target="_blank" rel="noreferrer" className="btn-ghost text-xs"><ShoppingBag size={12} />From ${Number(deals[0].price).toFixed(2)} at {deals[0].retailer}<ExternalLink size={10} /></a>}
+            <PriceAlertButton fragranceId={f.id} currentPrice={deals[0]?.price ?? f.price_tier_usd} />
+          </div>
         </div>
       </div>
 

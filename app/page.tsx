@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { RecentlyViewedRail } from '@/components/RecentlyViewedRail';
+import { TrendingRail } from '@/components/TrendingRail';
 const PILLARS=[
   {num:'01',title:'AI Fragrance Advisor',body:'Claude reads your taste like a perfumer — recommends from a real catalog, never a hallucinated name.',href:'/advisor',accent:'gold'},
   {num:'02',title:'Fragrance Database',body:'The full catalog with DNA scoring, note pyramids, accord bars, and Genome similarity matching.',href:'/database',accent:'electric'},
@@ -28,6 +30,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <TrendingRail />
+      <RecentlyViewedRail />
       <div className="divider-gold mx-auto max-w-5xl"/>
       <section className="px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-6xl">
