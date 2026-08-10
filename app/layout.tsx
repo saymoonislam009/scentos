@@ -4,6 +4,10 @@ import './globals.css';
 import { NavBar } from '@/components/NavBar';
 import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar';
 import { ToastProvider } from '@/components/Toast';
+<<<<<<< Updated upstream
+=======
+import { ConfirmProvider } from '@/components/ui/ConfirmProvider';
+>>>>>>> Stashed changes
 import { InstallPrompt } from '@/components/InstallPrompt';
 const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', weight: ['300','400','500','600'], style: ['normal','italic'] });
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -24,9 +28,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-body bg-matte text-bone min-h-screen">
         <ServiceWorkerRegistrar />
         <ToastProvider>
+<<<<<<< Updated upstream
           <NavBar />
           <main>{children}</main>
           <InstallPrompt />
+=======
+          <ConfirmProvider>
+            <NavBar />
+            <main>{children}</main>
+            <InstallPrompt />
+          </ConfirmProvider>
+>>>>>>> Stashed changes
         </ToastProvider>
       </body>
     </html>

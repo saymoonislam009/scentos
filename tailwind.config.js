@@ -6,6 +6,7 @@ module.exports = {
       colors: {
         matte:'#080806', obsidian:'#111110', obsidian2:'#191917', obsidian3:'#222220',
         gold:{ DEFAULT:'#C9A24B', soft:'#D9BD7A', pale:'#EDD99A', dim:'#8F7033' },
+        amber:{ DEFAULT:'#E8934A', deep:'#B8622A', pale:'#F4C58C', glow:'#FFAE5C' },
         electric:{ DEFAULT:'#4F8CFF', soft:'#7FA9FF', dim:'#2B5CCC' },
         bone:'#EDE8DF', ash:'#9C9488', ember:'#D4644A',
       },

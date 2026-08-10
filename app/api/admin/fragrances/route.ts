@@ -15,7 +15,7 @@ export async function POST(req:NextRequest){
   let brandId=ex?.id;
   if(!brandId){const{data:cr}=await a.from('brands').insert({name:body.brandName}).select('id').single();brandId=cr?.id;}
   if(!brandId)return NextResponse.json({error:'Could not resolve brand'},{status:500});
-  const{data,error}=await a.from('fragrances').insert({slug:body.slug||slugify(body.name,body.brandName),name:body.name,brand_id:brandId,release_year:body.releaseYear?Number(body.releaseYear):null,concentration:body.concentration||null,description:body.description||null,price_tier_usd:body.priceTierUsd?Number(body.priceTierUsd):null,seasons:body.seasons??[],occasions:body.occasions??[]}).select('*,brands(name)').single();
+  const{data,error}=await a.from('fragrances').insert({slug:body.slug||slugify(body.name,body.brandName),name:body.name,brand_id:brandId,release_year:body.releaseYear?Number(body.releaseYear):null,concentration:body.concentration||null,description:body.description||null,price_tier_usd:body.priceTierUsd?Number(body.priceTierUsd):null,longevity_hrs:body.longevityHrs?Number(body.longevityHrs):null,projection:body.projection||null,seasons:body.seasons??[],occasions:body.occasions??[]}).select('*,brands(name)').single();
   if(error)return NextResponse.json({error:error.message},{status:500});
   return NextResponse.json(data);
 }

@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { MapPin, Flag } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
+import { usePrompt } from '@/components/ui/ConfirmProvider';
 const PM: Record<string,string> = { online:'Online payment','face-to-face':'Face to face', both:'Either' };
 export default function PartialBottlesPage() {
   const { user } = useUser();
+  const promptDialog = usePrompt();
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioning, setActioning] = useState<string|null>(null);
@@ -21,7 +23,8 @@ export default function PartialBottlesPage() {
   }
   async function report(id: string, sellerId: string) {
     if (!user) return;
-    const reason = window.prompt("What's wrong with this listing?"); if (!reason) return;
+    const reason = await promptDialog({ title: 'Report listing', message: "Tell us what's wrong with this listing.", placeholder: 'e.g. Seller unresponsive, suspicious pricing…', confirmLabel: 'Send report' });
+    if (!reason) return;
     await createClient().from('reports').insert({ reporter_id: user.id, listing_id: id, reported_user_id: sellerId, reason });
     setNotice('Report sent. Thank you.');
   }

@@ -3,9 +3,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
+import { useConfirm } from '@/components/ui/ConfirmProvider';
+import { useToast } from '@/components/Toast';
 const TC: Record<string,string> = { bottle:'border-gold/30 bg-gold/[0.08] text-gold', decant:'border-electric/30 bg-electric/[0.08] text-electric', wishlist:'border-bone/15 text-ash', empty:'border-bone/10 text-ash/50' };
 export default function CollectionPage() {
   const { user, loading: ul } = useUser();
+  const confirmDialog = useConfirm();
+  const { toast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -53,7 +57,7 @@ export default function CollectionPage() {
                     <div className="h-1 overflow-hidden rounded-full bg-bone/[0.06]"><div className="accord-bar h-full rounded-full" style={{ width: `${Math.min((item.ml_remaining / (item.bottle_size_ml || 100)) * 100, 100)}%` }} /></div>
                   </div>
                 )}
-                <button onClick={async () => { if (!confirm('Remove?')) return; await createClient().from('collection_items').delete().eq('id', item.id); setItems(p => p.filter(x => x.id !== item.id)); }} className="mt-4 text-2xs text-ash/40 hover:text-ember transition-colors">Remove</button>
+                <button onClick={async () => { const ok = await confirmDialog({ message: 'Remove this from your collection?', confirmLabel: 'Remove', danger: true }); if (!ok) return; await createClient().from('collection_items').delete().eq('id', item.id); setItems(p => p.filter(x => x.id !== item.id)); toast('Removed from collection.', 'success'); }} className="mt-4 text-2xs text-ash/40 hover:text-ember transition-colors">Remove</button>
               </div>
             ))}
             {filtered.length === 0 && <div className="col-span-full py-12 text-center"><p className="text-ash">Nothing here yet.</p><Link href="/database" className="mt-3 inline-block text-sm text-electric hover:underline">Browse fragrances →</Link></div>}

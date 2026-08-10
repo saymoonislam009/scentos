@@ -5,9 +5,13 @@ import { User, Package, Heart, ShoppingBag } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
 import { signOut } from '@/app/auth/actions';
+import { useConfirm } from '@/components/ui/ConfirmProvider';
+import { useToast } from '@/components/Toast';
 
 export default function AccountPage() {
   const { user, loading: ul } = useUser();
+  const confirmDialog = useConfirm();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [listings, setListings] = useState<any[]>([]);
   const [editName, setEditName] = useState(false);
@@ -118,9 +122,11 @@ export default function AccountPage() {
                   <Link href={`/partial-bottles/${l.id}/edit`} className="btn-ghost text-xs !py-1.5 !px-3">Edit</Link>
                   {l.status === 'active' && (
                     <button onClick={async () => {
-                      if (!confirm('Remove?')) return;
+                      const ok = await confirmDialog({ title: 'Remove listing', message: 'This will remove your listing from the marketplace. You can re-list later.', confirmLabel: 'Remove', danger: true });
+                      if (!ok) return;
                       await createClient().from('partial_bottle_listings').update({ status: 'removed' }).eq('id', l.id);
                       setListings(p => p.filter(x => x.id !== l.id));
+                      toast('Listing removed.', 'success');
                     }} className="rounded-full border border-ember/30 px-3 py-1.5 text-xs text-ember hover:bg-ember/10">Remove</button>
                   )}
                 </div>

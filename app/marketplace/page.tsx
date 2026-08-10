@@ -5,8 +5,11 @@ import { ShieldCheck, Clock, Package } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
 import { FragranceAutocomplete } from '@/components/FragranceAutocomplete';
+import { useConfirm, usePrompt } from '@/components/ui/ConfirmProvider';
 export default function MarketplacePage() {
   const { user } = useUser();
+  const confirmDialog = useConfirm();
+  const promptDialog = usePrompt();
   const [listings, setListings] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,9 +36,9 @@ export default function MarketplacePage() {
     setBuying(null); if (err) { setNotice(`Failed: ${err.message}`); return; }
     setNotice('Order placed — funds held in escrow until delivery confirmed.'); refreshListings(); refreshOrders();
   }
-  async function markShipped(id: string) { const t = window.prompt('Tracking number:') ?? ''; await createClient().rpc('mark_order_shipped', { p_order_id: id, p_tracking_number: t }); refreshOrders(); }
+  async function markShipped(id: string) { const t = await promptDialog({ title: 'Mark as shipped', message: 'Enter a tracking number so the buyer can follow their order.', placeholder: 'Tracking number', confirmLabel: 'Mark shipped' }); if (t === null) return; await createClient().rpc('mark_order_shipped', { p_order_id: id, p_tracking_number: t }); refreshOrders(); }
   async function confirmDelivered(id: string) { await createClient().rpc('confirm_order_delivered', { p_order_id: id }); refreshOrders(); setNotice('Confirmed. Funds release in 72h.'); }
-  async function dispute(id: string) { if (!window.confirm('Open a dispute?')) return; await createClient().rpc('dispute_order', { p_order_id: id }); refreshOrders(); }
+  async function dispute(id: string) { const ok = await confirmDialog({ title: 'Open a dispute', message: 'This flags the order for review. Only do this if something went wrong with the transaction.', confirmLabel: 'Open dispute', danger: true }); if (!ok) return; await createClient().rpc('dispute_order', { p_order_id: id }); refreshOrders(); }
   return (
     <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
       <div className="flex flex-wrap items-start justify-between gap-6">

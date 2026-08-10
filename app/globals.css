@@ -4,7 +4,12 @@
 
 @layer base {
   html { color-scheme: dark; scroll-behavior: smooth; }
-  body { background-color: #080806; color: #EDE8DF; min-height: 100vh; }
+  body { background-color: #080806; color: #EDE8DF; min-height: 100vh; position: relative; }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    opacity: 0.035; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
   ::selection { background-color: rgba(201,162,75,0.3); color: #EDE8DF; }
   :focus-visible { outline: 1.5px solid #C9A24B; outline-offset: 3px; border-radius: 4px; }
   ::-webkit-scrollbar { width: 5px; }
@@ -30,13 +35,23 @@
     background: rgba(17,17,16,0.75);
     border: 1px solid rgba(237,232,223,0.07);
     border-radius: 1.25rem;
+    position: relative;
+    overflow: hidden;
     transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  }
+  .card::after {
+    content: ''; position: absolute; top: 0.9rem; right: 0.9rem;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #C9A24B; opacity: 0; transform: scale(0.4);
+    box-shadow: 0 0 10px 2px rgba(201,162,75,0.6);
+    transition: opacity 0.3s, transform 0.3s;
   }
   .card:hover {
     border-color: rgba(201,162,75,0.22);
     box-shadow: 0 8px 40px rgba(0,0,0,0.45);
     transform: translateY(-2px);
   }
+  .card:hover::after { opacity: 1; transform: scale(1); }
   .input {
     width: 100%; border-radius: 0.625rem;
     border: 1px solid rgba(237,232,223,0.10);
@@ -96,4 +111,41 @@
   animation: shimmer 4s linear infinite;
 }
 .glow-gold { position:absolute; border-radius:50%; background:radial-gradient(circle, rgba(201,162,75,0.12) 0%, transparent 70%); pointer-events:none; }
-@media (prefers-reduced-motion: reduce) { *, .animate-fade-up, .shimmer-text { animation:none!important; transition:none!important; } }
+
+/* Signature bottle hero animations */
+.bottle-ambient-glow {
+  position: absolute; inset: -15%; z-index: -1;
+  background: radial-gradient(ellipse 60% 55% at 50% 55%, rgba(232,147,74,0.20) 0%, rgba(201,162,75,0.10) 35%, transparent 70%);
+  filter: blur(8px);
+  animation: bottleGlowPulse 6s ease-in-out infinite;
+}
+@keyframes bottleGlowPulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+.bottle-liquid {
+  animation: liquidSettle 3.5s cubic-bezier(0.22,1,0.36,1) both, liquidShimmer 5s ease-in-out 3.5s infinite;
+  transform-origin: bottom;
+}
+@keyframes liquidSettle {
+  0% { transform: scaleY(0); }
+  100% { transform: scaleY(1); }
+}
+@keyframes liquidShimmer {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.12); }
+}
+.bottle-mist {
+  animation: mistRise 4.5s ease-out infinite;
+  transform-origin: center;
+}
+@keyframes mistRise {
+  0% { opacity: 0; transform: translateY(0) scale(0.7); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-38px) scale(1.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, .animate-fade-up, .shimmer-text { animation:none!important; transition:none!important; }
+  .bottle-ambient-glow, .bottle-liquid, .bottle-mist { animation: none !important; }
+  .bottle-liquid { transform: scaleY(1) !important; }
+}
