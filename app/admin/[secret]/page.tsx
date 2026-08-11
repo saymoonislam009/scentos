@@ -3,11 +3,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { TopBrandsChart, ActivityTrendChart } from '@/components/admin/AdminCharts';
 import { NotesAccordsEditor } from '@/components/admin/NotesAccordsEditor';
-<<<<<<< Updated upstream
-=======
 import { useConfirm } from '@/components/ui/ConfirmProvider';
 import { useToast } from '@/components/Toast';
->>>>>>> Stashed changes
 type Tab = 'overview'|'fragrances'|'prices'|'orders'|'users'|'partial-listings'|'reports'|'import';
 function af(path:string,secret:string,init:RequestInit={}):Promise<any>{
   return fetch(path,{...init,headers:{'Content-Type':'application/json','x-admin-secret':secret,...(init.headers as any||{})}}).then(r=>r.json());
@@ -55,16 +52,11 @@ function Overview({secret}:{secret:string}){
   </div>;
 }
 function Fragrances({secret}:{secret:string}){
-<<<<<<< Updated upstream
-  const[items,setItems]=useState<any[]>([]);const[loading,setLoading]=useState(true);const[search,setSearch]=useState('');const[editing,setEditing]=useState<any>(null);const[notesEditingId,setNotesEditingId]=useState<string|null>(null);
-  const[form,setForm]=useState({name:'',brandName:'',concentration:'',priceTierUsd:'',description:'',seasons:'',occasions:''});const[error,setError]=useState('');
-=======
   const confirmDialog=useConfirm();
   const{toast}=useToast();
   const[items,setItems]=useState<any[]>([]);const[loading,setLoading]=useState(true);const[search,setSearch]=useState('');const[editing,setEditing]=useState<any>(null);const[notesEditingId,setNotesEditingId]=useState<string|null>(null);
   const[form,setForm]=useState({name:'',brandName:'',concentration:'',priceTierUsd:'',releaseYear:'',longevityHrs:'',projection:'',description:'',seasons:'',occasions:''});const[error,setError]=useState('');
   const[justCreatedId,setJustCreatedId]=useState<string|null>(null);
->>>>>>> Stashed changes
   const refresh=()=>{setLoading(true);af('/api/admin/fragrances',secret).then(setItems).finally(()=>setLoading(false));};
   useEffect(refresh,[secret]);
   const filtered=items.filter(f=>f.name?.toLowerCase().includes(search.toLowerCase())||f.brands?.name?.toLowerCase().includes(search.toLowerCase()));
@@ -76,11 +68,7 @@ function Fragrances({secret}:{secret:string}){
       {justCreatedId&&<div className="mt-4 flex items-center gap-3 rounded-xl border border-electric/25 bg-electric/[0.06] px-4 py-3"><p className="flex-1 text-sm text-bone">Fragrance added. Add notes and accords now?</p><button type="button" onClick={()=>{setNotesEditingId(justCreatedId);setJustCreatedId(null);}} className="btn-electric text-xs !py-1.5 !px-3">Add now</button><button type="button" onClick={()=>setJustCreatedId(null)} className="text-xs text-ash">Later</button></div>}
     </form>
     <div className="glass rounded-2xl p-4"><div className="mb-4 flex items-center gap-3"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" className="input max-w-xs"/><p className="text-sm text-ash">{filtered.length}</p></div>
-<<<<<<< Updated upstream
-      {loading?<div className="space-y-2">{[...Array(5)].map((_,i)=><div key={i} className="h-10 animate-pulse rounded-lg bg-obsidian2"/>)}</div>:<div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Name','Brand','Type','Price','Emb','Status',''].map(h=><th key={h} className="pb-3 pr-4 font-mono text-2xs uppercase tracking-wider text-ash">{h}</th>)}</tr></thead><tbody>{filtered.map(f=><tr key={f.id} className="border-b border-bone/[0.04] hover:bg-bone/[0.02]"><td className="py-2.5 pr-4 text-bone">{f.name}</td><td className="py-2.5 pr-4 text-ash">{f.brands?.name}</td><td className="py-2.5 pr-4 font-mono text-xs text-ash">{f.concentration||'—'}</td><td className="py-2.5 pr-4 font-mono text-xs text-ash">{f.price_tier_usd?`$${f.price_tier_usd}`:'—'}</td><td className="py-2.5 pr-4">{f.embedding?<span className="text-electric">✓</span>:<span className="text-ash/40">—</span>}</td><td className="py-2.5 pr-4"><button onClick={()=>af(`/api/admin/fragrances/${f.id}`,secret,{method:'PATCH',body:JSON.stringify({toggleDiscontinued:true})}).then(refresh)} className={`font-mono text-2xs ${f.discontinued?'text-ember':'text-electric'}`}>{f.discontinued?'Disc.':'Active'}</button></td><td className="py-2.5 text-right"><button onClick={()=>setNotesEditingId(f.id)} className="mr-3 text-xs text-electric hover:underline">Notes/Accords</button><button onClick={()=>setEditing(f)} className="mr-3 text-xs text-bone hover:text-gold">Edit</button><button onClick={()=>{if(confirm('Delete?'))af(`/api/admin/fragrances/${f.id}`,secret,{method:'DELETE'}).then(refresh);}} className="text-xs text-ember">Del</button></td></tr>)}</tbody></table></div>}
-=======
       {loading?<div className="space-y-2">{[...Array(5)].map((_,i)=><div key={i} className="h-10 animate-pulse rounded-lg bg-obsidian2"/>)}</div>:<div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Name','Brand','Type','Price','Emb','Status',''].map(h=><th key={h} className="pb-3 pr-4 font-mono text-2xs uppercase tracking-wider text-ash">{h}</th>)}</tr></thead><tbody>{filtered.map(f=><tr key={f.id} className="border-b border-bone/[0.04] hover:bg-bone/[0.02]"><td className="py-2.5 pr-4 text-bone">{f.name}</td><td className="py-2.5 pr-4 text-ash">{f.brands?.name}</td><td className="py-2.5 pr-4 font-mono text-xs text-ash">{f.concentration||'—'}</td><td className="py-2.5 pr-4 font-mono text-xs text-ash">{f.price_tier_usd?`$${f.price_tier_usd}`:'—'}</td><td className="py-2.5 pr-4">{f.embedding?<span className="text-electric">✓</span>:<span className="text-ash/40">—</span>}</td><td className="py-2.5 pr-4"><button onClick={()=>af(`/api/admin/fragrances/${f.id}`,secret,{method:'PATCH',body:JSON.stringify({toggleDiscontinued:true})}).then(refresh)} className={`font-mono text-2xs ${f.discontinued?'text-ember':'text-electric'}`}>{f.discontinued?'Disc.':'Active'}</button></td><td className="py-2.5 text-right"><button onClick={()=>setNotesEditingId(f.id)} className="mr-3 text-xs text-electric hover:underline">Notes/Accords</button><button onClick={()=>setEditing(f)} className="mr-3 text-xs text-bone hover:text-gold">Edit</button><button onClick={async()=>{const ok=await confirmDialog({title:'Delete fragrance',message:`Permanently delete "${f.name}"? This also removes its notes, accords, and price history.`,confirmLabel:'Delete',danger:true});if(!ok)return;const r=await af(`/api/admin/fragrances/${f.id}`,secret,{method:'DELETE'});if(r?.error){toast(r.error,'error');return;}toast('Fragrance deleted.','success');refresh();}} className="text-xs text-ember">Del</button></td></tr>)}</tbody></table></div>}
->>>>>>> Stashed changes
     </div>
     {notesEditingId&&<NotesAccordsEditor fragranceId={notesEditingId} secret={secret} onClose={()=>setNotesEditingId(null)}/>}
   </div>;

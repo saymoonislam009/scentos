@@ -3,10 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, User, Sparkles, Search, Layers, ShoppingBag, Package, TrendingUp, Users, FlaskConical, BookOpen, Scale } from 'lucide-react';
-<<<<<<< Updated upstream
-=======
 import { BottleMark } from '@/components/BottleMark';
->>>>>>> Stashed changes
 import { AnimatePresence, motion } from 'framer-motion';
 import { useUser } from '@/lib/useUser';
 import { signOut } from '@/app/auth/actions';
@@ -40,18 +37,12 @@ export function NavBar() {
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'glass border-b border-bone/[0.06]' : 'bg-transparent'}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-<<<<<<< Updated upstream
-        <Link href="/" className="group flex items-baseline gap-0.5 shrink-0">
-          <span className="font-display text-xl font-medium text-bone">Scent</span>
-          <span className="font-display text-xl font-medium text-gold transition-colors">OS</span>
-=======
         <Link href="/" className="group flex items-center gap-2 shrink-0">
           <BottleMark className="h-5 w-5 text-gold transition-transform duration-300 group-hover:scale-110" />
           <span className="flex items-baseline gap-0.5">
             <span className="font-display text-xl font-medium text-bone">Scent</span>
             <span className="font-display text-xl font-medium text-gold transition-colors">OS</span>
           </span>
->>>>>>> Stashed changes
         </Link>
 
         <nav className="hidden items-center gap-0.5 xl:flex">

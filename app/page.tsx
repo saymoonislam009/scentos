@@ -1,15 +1,4 @@
 import Link from 'next/link';
-<<<<<<< Updated upstream
-import { RecentlyViewedRail } from '@/components/RecentlyViewedRail';
-import { TrendingRail } from '@/components/TrendingRail';
-const PILLARS=[
-  {num:'01',title:'AI Fragrance Advisor',body:'Claude reads your taste like a perfumer — recommends from a real catalog, never a hallucinated name.',href:'/advisor',accent:'gold'},
-  {num:'02',title:'Fragrance Database',body:'The full catalog with DNA scoring, note pyramids, accord bars, and Genome similarity matching.',href:'/database',accent:'electric'},
-  {num:'03',title:'Used Bottle Market',body:'Casual classifieds for partial bottles. Anyone can browse — an account is only needed to request a purchase.',href:'/partial-bottles',accent:'gold'},
-  {num:'04',title:'ScentGPT',body:'A chat expert that looks up real notes and prices before it answers. Ask it anything.',href:'/scentgpt',accent:'electric'},
-  {num:'05',title:'Collection & Layering',body:'Track every bottle and decant. Then get AI-powered layering combinations from what you already own.',href:'/collection',accent:'gold'},
-  {num:'06',title:'Decant Marketplace',body:'Escrow-protected decant trading. Funds held until delivery confirmed, auto-released 72h later.',href:'/marketplace',accent:'electric'},
-=======
 import { Sparkles, Search, Package, MessageSquare, Layers, ShieldCheck } from 'lucide-react';
 import { RecentlyViewedRail } from '@/components/RecentlyViewedRail';
 import { TrendingRail } from '@/components/TrendingRail';
@@ -22,7 +11,6 @@ const PILLARS = [
   { icon: MessageSquare, title: 'ScentGPT', body: 'A chat expert that looks up real notes and prices before it answers. Ask it anything.', href: '/scentgpt', accent: 'electric' },
   { icon: Layers, title: 'Collection & Layering', body: 'Track every bottle and decant. Then get AI-powered layering combinations from what you already own.', href: '/collection', accent: 'gold' },
   { icon: ShieldCheck, title: 'Decant Marketplace', body: 'Escrow-protected decant trading. Funds held until delivery confirmed, auto-released 72h later.', href: '/marketplace', accent: 'electric' },
->>>>>>> Stashed changes
 ] as const;
 
 export default function HomePage() {
@@ -52,18 +40,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-<<<<<<< Updated upstream
-      <TrendingRail />
-      <RecentlyViewedRail />
-      <div className="divider-gold mx-auto max-w-5xl"/>
-=======
 
       <TrendingRail />
       <RecentlyViewedRail />
 
       <div className="divider-gold mx-auto max-w-5xl" />
 
->>>>>>> Stashed changes
       <section className="px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <p className="section-label mb-4">What ScentOS does</p>
