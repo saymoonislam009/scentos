@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { User, Package, Heart, ShoppingBag } from 'lucide-react';
+import { User, Package, Heart, ShoppingBag, Bell, X } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
 import { signOut } from '@/app/auth/actions';
 import { useConfirm } from '@/components/ui/ConfirmProvider';
 import { useToast } from '@/components/Toast';
+import { api } from '@/lib/api';
 
 export default function AccountPage() {
   const { user, loading: ul } = useUser();
@@ -14,6 +15,7 @@ export default function AccountPage() {
   const { toast } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [listings, setListings] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
   const [editName, setEditName] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -26,7 +28,16 @@ export default function AccountPage() {
     });
     s.from('partial_bottle_listings').select('*').eq('seller_id', user.id)
       .order('created_at', { ascending: false }).then(({ data }) => setListings(data ?? []));
+    api.getAlerts().then(setAlerts).catch(() => {});
   }, [user]);
+
+  async function removeAlert(id: string) {
+    const ok = await confirmDialog({ message: 'Remove this price alert?', confirmLabel: 'Remove' });
+    if (!ok) return;
+    await api.deleteAlert(id);
+    setAlerts(a => a.filter(x => x.id !== id));
+    toast('Alert removed.', 'success');
+  }
 
   async function saveName() {
     if (!user) return;
@@ -95,6 +106,28 @@ export default function AccountPage() {
           </Link>
         ))}
       </div>
+
+      {alerts.length > 0 && (
+        <div className="mt-10">
+          <h2 className="mb-4 font-display text-xl text-bone">Price alerts</h2>
+          <div className="space-y-2">
+            {alerts.map(a => (
+              <div key={a.id} className="glass flex items-center justify-between gap-3 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${a.triggered ? 'bg-electric/12 text-electric' : 'bg-gold/12 text-gold'}`}><Bell size={13} /></div>
+                  <div>
+                    <Link href={`/fragrance/${a.fragrances?.slug}`} className="text-sm text-bone hover:text-gold">{a.fragrances?.name}</Link>
+                    <p className="font-mono text-2xs text-ash">
+                      {a.triggered ? <span className="text-electric">Triggered — dropped to your target</span> : `Watching for $${a.target_price}`}
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => removeAlert(a.id)} className="shrink-0 text-ash/50 hover:text-ember"><X size={14} /></button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-10">
         <div className="mb-4 flex items-center justify-between">

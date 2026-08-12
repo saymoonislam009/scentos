@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { TopBrandsChart, ActivityTrendChart } from '@/components/admin/AdminCharts';
 import { NotesAccordsEditor } from '@/components/admin/NotesAccordsEditor';
-import { useConfirm } from '@/components/ui/ConfirmProvider';
+import { useConfirm, usePrompt } from '@/components/ui/ConfirmProvider';
 import { useToast } from '@/components/Toast';
-type Tab = 'overview'|'fragrances'|'prices'|'orders'|'users'|'partial-listings'|'reports'|'import';
+type Tab = 'overview'|'fragrances'|'prices'|'orders'|'users'|'partial-listings'|'reports'|'import'|'settings';
 function af(path:string,secret:string,init:RequestInit={}):Promise<any>{
   return fetch(path,{...init,headers:{'Content-Type':'application/json','x-admin-secret':secret,...(init.headers as any||{})}}).then(r=>r.json());
 }
@@ -16,7 +16,7 @@ export default function AdminPage(){
   const[tab,setTab]=useState<Tab>('overview');
   useEffect(()=>{fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({secret})}).then(r=>r.json()).then(d=>{if(d.ok)setAuthed(true);else router.replace('/')}).catch(()=>router.replace('/'));},[secret,router]);
   if(!authed)return<div className="flex min-h-[60vh] items-center justify-center"><div className="text-center"><div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent"/><p className="text-sm text-ash">Verifying…</p></div></div>;
-  const TABS:{id:Tab;label:string}[]=[{id:'overview',label:'Overview'},{id:'fragrances',label:'Fragrances'},{id:'prices',label:'Prices'},{id:'orders',label:'Orders'},{id:'users',label:'Users'},{id:'partial-listings',label:'Used Bottles'},{id:'reports',label:'Reports'},{id:'import',label:'Import'}];
+  const TABS:{id:Tab;label:string}[]=[{id:'overview',label:'Overview'},{id:'fragrances',label:'Fragrances'},{id:'prices',label:'Prices'},{id:'orders',label:'Orders'},{id:'users',label:'Users'},{id:'partial-listings',label:'Used Bottles'},{id:'reports',label:'Reports'},{id:'import',label:'Import'},{id:'settings',label:'Settings'}];
   return(
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="flex items-center justify-between"><div><p className="section-label mb-1">Private</p><h1 className="font-display text-3xl text-bone">Admin Panel</h1></div><span className="font-mono text-2xs text-ash">ScentOS</span></div>
@@ -32,6 +32,7 @@ export default function AdminPage(){
         {tab==='partial-listings'&&<PartialListings secret={secret}/>}
         {tab==='reports'&&<Reports secret={secret}/>}
         {tab==='import'&&<Import secret={secret}/>}
+        {tab==='settings'&&<Settings secret={secret}/>}
       </div>
     </div>
   );
@@ -81,7 +82,7 @@ function Prices({secret}:{secret:string}){
   async function add(e:React.FormEvent){e.preventDefault();setError('');const r=await af(`/api/admin/prices/${sel}`,secret,{method:'POST',body:JSON.stringify({retailer:form.retailer,price:Number(form.price),url:form.url,currency:form.currency})});if(r.error){setError(r.error);return;}setForm({retailer:'',price:'',url:'',currency:'USD'});load(sel);}
   return<div className="space-y-6"><div className="glass rounded-2xl p-6"><h2 className="mb-4 font-display text-lg text-bone">Select fragrance</h2><select value={sel} onChange={e=>load(e.target.value)} className="input max-w-sm"><option value="">Choose…</option>{fragrances.map(f=><option key={f.id} value={f.id}>{f.name} — {f.brands?.name}</option>)}</select></div>
     {sel&&<><form onSubmit={add} className="glass rounded-2xl p-6"><h2 className="mb-4 font-display text-lg text-bone">Add price point</h2><div className="grid gap-3 sm:grid-cols-4">{(['retailer','price','url'] as const).map((k,i)=>{const l=['Retailer','Price','URL'][i];const t=k==='price'?'number':'text';return(<label key={k} className="block"><span className="mb-1 block font-mono text-2xs uppercase tracking-wider text-ash">{l}</span><input type={t} required value={(form as any)[k]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} className="input"/></label>);})}<label className="block"><span className="mb-1 block font-mono text-2xs uppercase tracking-wider text-ash">Currency</span><select value={form.currency} onChange={e=>setForm(f=>({...f,currency:e.target.value}))} className="input"><option>USD</option><option>BDT</option><option>GBP</option><option>EUR</option></select></label></div>{error&&<p className="mt-3 text-sm text-ember">{error}</p>}<button type="submit" className="btn-gold mt-4">Add price</button></form>
-    <div className="glass rounded-2xl p-4">{loading?<p className="text-ash">Loading…</p>:prices.length===0?<p className="text-ash">No prices yet.</p>:<table className="w-full text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Retailer','Price','Currency',''].map(h=><th key={h} className="pb-2 pr-4 text-left font-mono text-2xs uppercase text-ash">{h}</th>)}</tr></thead><tbody>{prices.map((p:any)=><tr key={p.id} className="border-b border-bone/[0.04]"><td className="py-2 pr-4 text-bone">{p.retailer}</td><td className="py-2 pr-4 font-mono text-gold">{p.price}</td><td className="py-2 pr-4 text-ash">{p.currency}</td><td className="py-2 text-right"><button onClick={()=>af(`/api/admin/prices/point/${p.id}`,secret,{method:'DELETE'}).then(()=>load(sel))} className="text-xs text-ember">Del</button></td></tr>)}</tbody></table>}</div></>}
+    <div className="glass rounded-2xl p-4">{loading?<p className="text-ash">Loading…</p>:prices.length===0?<p className="text-ash">No prices yet.</p>:<div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Retailer','Price','Currency',''].map(h=><th key={h} className="pb-2 pr-4 text-left font-mono text-2xs uppercase text-ash">{h}</th>)}</tr></thead><tbody>{prices.map((p:any)=><tr key={p.id} className="border-b border-bone/[0.04]"><td className="py-2 pr-4 text-bone">{p.retailer}</td><td className="py-2 pr-4 font-mono text-gold">{p.price}</td><td className="py-2 pr-4 text-ash">{p.currency}</td><td className="py-2 text-right"><button onClick={()=>af(`/api/admin/prices/point/${p.id}`,secret,{method:'DELETE'}).then(()=>load(sel))} className="text-xs text-ember">Del</button></td></tr>)}</tbody></table></div>}</div></>}
   </div>;
 }
 function Orders({secret}:{secret:string}){
@@ -106,16 +107,72 @@ function PartialListings({secret}:{secret:string}){
   return<div className="glass rounded-2xl p-4 overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Bottle','Seller','Price','Inq','Rep','Status',''].map(h=><th key={h} className="pb-3 pr-4 text-left font-mono text-2xs uppercase text-ash">{h}</th>)}</tr></thead><tbody>{listings.map(l=><tr key={l.id} className="border-b border-bone/[0.04]"><td className="py-2.5 pr-4 text-bone">{l.perfume_name}</td><td className="py-2.5 pr-4 text-ash">{(l.profiles as any)?.email??'—'}</td><td className="py-2.5 pr-4 font-mono text-gold">{l.currency} {Number(l.price).toFixed(0)}</td><td className="py-2.5 pr-4 text-electric">{l.inquiry_count}</td><td className={`py-2.5 pr-4 ${l.report_count>0?'text-ember font-bold':'text-ash'}`}>{l.report_count}</td><td className={`py-2.5 pr-4 font-mono text-2xs ${l.status==='active'?'text-electric':'text-ember'}`}>{l.status}</td><td className="py-2.5 text-right">{l.status==='active'?<button onClick={()=>af(`/api/admin/partial-listings/${l.id}`,secret,{method:'PATCH',body:JSON.stringify({status:'removed'})}).then(refresh)} className="text-xs text-ember">Remove</button>:<button onClick={()=>af(`/api/admin/partial-listings/${l.id}`,secret,{method:'PATCH',body:JSON.stringify({status:'active'})}).then(refresh)} className="text-xs text-electric">Restore</button>}</td></tr>)}</tbody></table></div>;
 }
 function Reports({secret}:{secret:string}){
+  const confirmDialog=useConfirm();const promptDialog=usePrompt();const{toast}=useToast();
   const[reports,setReports]=useState<any[]>([]);const[loading,setLoading]=useState(true);const[groupBy,setGroupBy]=useState<'none'|'user'|'listing'>('none');
   const refresh=()=>{setLoading(true);af('/api/admin/reports',secret).then(setReports).finally(()=>setLoading(false));};
   useEffect(refresh,[secret]);
+  async function removeListing(listingId:string){
+    const ok=await confirmDialog({title:'Remove listing',message:'This takes the listing off the marketplace immediately.',confirmLabel:'Remove',danger:true});
+    if(!ok)return;
+    const r=await af(`/api/admin/partial-listings/${listingId}`,secret,{method:'PATCH',body:JSON.stringify({status:'removed'})});
+    if(r?.error){toast(r.error,'error');return;}
+    toast('Listing removed.','success');refresh();
+  }
+  async function suspendUser(userId:string,email:string){
+    const reason=await promptDialog({title:'Suspend user',message:`Suspending ${email} blocks them from creating new listings, decants, reviews, or posts. Why?`,placeholder:'Reason (shown only to admins)',confirmLabel:'Suspend'});
+    if(reason===null)return;
+    const r=await af(`/api/admin/users/${userId}/suspend`,secret,{method:'POST',body:JSON.stringify({reason})});
+    if(r?.error){toast(r.error,'error');return;}
+    toast(`${email} suspended.`,'success');refresh();
+  }
+  async function unsuspendUser(userId:string,email:string){
+    const ok=await confirmDialog({message:`Restore ${email}'s ability to post listings, decants, reviews, and posts?`,confirmLabel:'Unsuspend'});
+    if(!ok)return;
+    const r=await af(`/api/admin/users/${userId}/suspend`,secret,{method:'DELETE'});
+    if(r?.error){toast(r.error,'error');return;}
+    toast(`${email} unsuspended.`,'success');refresh();
+  }
   const groups=new Map<string,any[]>();
   if(groupBy==='none')groups.set('all',reports);
   else if(groupBy==='user')for(const r of reports){const k=(r.reported_user as any)?.email??'Unknown';groups.set(k,[...(groups.get(k)??[]),r]);}
   else for(const r of reports){const k=(r.partial_bottle_listings as any)?.perfume_name??'Unknown';groups.set(k,[...(groups.get(k)??[]),r]);}
   if(loading)return<div className="h-48 animate-pulse rounded-2xl bg-obsidian2"/>;
   if(!reports.length)return<p className="text-ash">No reports.</p>;
-  return<div><div className="mb-5 flex gap-2">{(['none','user','listing'] as const).map(g=><button key={g} onClick={()=>setGroupBy(g)} className={`rounded-full px-3 py-1 text-xs capitalize transition-colors ${groupBy===g?'bg-gold text-matte':'bg-bone/5 text-ash hover:bg-bone/10'}`}>{g==='none'?'All reports':`By ${g}`}</button>)}</div><div className="space-y-5">{[...groups.entries()].map(([key,group])=><div key={key}>{groupBy!=='none'&&<p className="mb-2 font-mono text-2xs uppercase tracking-wider text-ash">{key} — {group.length}</p>}<div className="space-y-3">{group.map(r=><div key={r.id} className="glass rounded-2xl p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div className="flex-1"><p className="font-medium text-bone">{r.reason}</p>{r.details&&<p className="mt-1 text-sm text-ash">{r.details}</p>}<div className="mt-2 flex flex-wrap gap-3 font-mono text-2xs text-ash"><span>By {(r.reporter as any)?.email}</span>{r.reported_user&&<span>Against: {(r.reported_user as any).email}</span>}{r.partial_bottle_listings&&<span>Listing: &ldquo;{(r.partial_bottle_listings as any).perfume_name}&rdquo;</span>}</div></div><select value={r.status} onChange={e=>af(`/api/admin/reports/${r.id}`,secret,{method:'PATCH',body:JSON.stringify({status:e.target.value})}).then(refresh)} className="input w-auto shrink-0 py-1.5 text-xs"><option value="open">Open</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select></div></div>)}</div></div>)}</div></div>;
+  return<div><div className="mb-5 flex gap-2">{(['none','user','listing'] as const).map(g=><button key={g} onClick={()=>setGroupBy(g)} className={`rounded-full px-3 py-1 text-xs capitalize transition-colors ${groupBy===g?'bg-gold text-matte':'bg-bone/5 text-ash hover:bg-bone/10'}`}>{g==='none'?'All reports':`By ${g}`}</button>)}</div>
+    <div className="space-y-5">{[...groups.entries()].map(([key,group])=>(
+      <div key={key}>
+        {groupBy!=='none'&&<p className="mb-2 font-mono text-2xs uppercase tracking-wider text-ash">{key} — {group.length}</p>}
+        <div className="space-y-3">{group.map(r=>{
+          const reportedUser=r.reported_user as any;
+          const listing=r.partial_bottle_listings as any;
+          return(
+            <div key={r.id} className="glass rounded-2xl p-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex-1">
+                  <p className="font-medium text-bone">{r.reason}</p>
+                  {r.details&&<p className="mt-1 text-sm text-ash">{r.details}</p>}
+                  <div className="mt-2 flex flex-wrap gap-3 font-mono text-2xs text-ash">
+                    <span>By {(r.reporter as any)?.email}</span>
+                    {reportedUser&&<span>Against: {reportedUser.email}{reportedUser.is_suspended&&<span className="ml-1.5 text-ember">· suspended</span>}</span>}
+                    {listing&&<span>Listing: &ldquo;{listing.perfume_name}&rdquo;{listing.status!=='active'&&<span className="ml-1.5 text-ash/60">· {listing.status}</span>}</span>}
+                    {r.reportedUserTotalReports>1&&<span className="text-ember">{r.reportedUserTotalReports} total reports against this user</span>}
+                  </div>
+                </div>
+                <select value={r.status} onChange={e=>af(`/api/admin/reports/${r.id}`,secret,{method:'PATCH',body:JSON.stringify({status:e.target.value})}).then(refresh)} className="input w-auto shrink-0 py-1.5 text-xs"><option value="open">Open</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select>
+              </div>
+              {(listing||reportedUser)&&<div className="mt-4 flex flex-wrap gap-2 border-t border-bone/[0.06] pt-4">
+                {listing&&listing.status==='active'&&<button onClick={()=>removeListing(listing.id)} className="rounded-full border border-ember/30 px-3 py-1.5 text-xs text-ember hover:bg-ember/10">Remove listing</button>}
+                {reportedUser&&(reportedUser.is_suspended
+                  ?<button onClick={()=>unsuspendUser(reportedUser.id,reportedUser.email)} className="rounded-full border border-electric/30 px-3 py-1.5 text-xs text-electric hover:bg-electric/10">Unsuspend user</button>
+                  :<button onClick={()=>suspendUser(reportedUser.id,reportedUser.email)} className="rounded-full border border-ember/30 px-3 py-1.5 text-xs text-ember hover:bg-ember/10">Suspend user</button>
+                )}
+              </div>}
+            </div>
+          );
+        })}</div>
+      </div>
+    ))}</div>
+  </div>;
 }
 function Import({secret}:{secret:string}){
   const[mode,setMode]=useState<'csv'|'pdf'>('csv');
@@ -246,5 +303,82 @@ function PdfImport({secret}:{secret:string}){
     {result&&<div className="glass rounded-2xl p-6"><div className="flex gap-6"><div><p className="font-mono text-2xs uppercase text-ash">Imported</p><p className="font-display text-3xl text-electric">{result.ok}</p></div><div><p className="font-mono text-2xs uppercase text-ash">Failed</p><p className={`font-display text-3xl ${result.failed>0?'text-ember':'text-ash'}`}>{result.failed}</p></div></div>{result.results?.filter((r:any)=>r.status==='error').map((r:any)=><div key={r.row} className="mt-2 rounded-lg bg-ember/10 px-3 py-2 text-xs text-ember">Row {r.row} — {r.name}: {r.error}</div>)}
       <button onClick={()=>{setFile(null);setExtracted(null);setResult(null);}} className="mt-4 font-mono text-2xs text-electric hover:underline">Import another PDF</button>
     </div>}
+  </div>;
+}
+
+function Settings({secret}:{secret:string}){
+  const{toast}=useToast();
+  const confirmDialog=useConfirm();
+  const[keys,setKeys]=useState<any[]|null>(null);
+  const[editing,setEditing]=useState<string|null>(null);
+  const[value,setValue]=useState('');
+  const[saving,setSaving]=useState(false);
+  const[testing,setTesting]=useState<string|null>(null);
+  const refresh=()=>{af('/api/admin/settings',secret).then(setKeys);};
+  useEffect(refresh,[secret]);
+
+  async function save(dbKey:string){
+    if(!value.trim()){toast('Enter a key first.','error');return;}
+    setSaving(true);
+    const r=await af('/api/admin/settings',secret,{method:'POST',body:JSON.stringify({dbKey,value:value.trim()})});
+    setSaving(false);
+    if(r?.error){toast(r.error,'error');return;}
+    toast('Key saved. Takes effect within ~2 minutes.','success');
+    setEditing(null);setValue('');refresh();
+  }
+  async function revert(dbKey:string,label:string){
+    const ok=await confirmDialog({title:'Revert to environment variable',message:`This removes the admin-set override for ${label} and falls back to whatever's in your Vercel environment variables.`,confirmLabel:'Revert'});
+    if(!ok)return;
+    const r=await af(`/api/admin/settings?dbKey=${dbKey}`,secret,{method:'DELETE'});
+    if(r?.error){toast(r.error,'error');return;}
+    toast(`Reverted to ${r.revertedTo==='env'?'environment variable':'nothing — no key configured'}.`,'success');
+    refresh();
+  }
+  async function testConnection(dbKey:string){
+    setTesting(dbKey);
+    const r=await af('/api/admin/settings/test',secret,{method:'POST',body:JSON.stringify({dbKey})});
+    setTesting(null);
+    if(r?.ok)toast('Connection successful.','success');
+    else toast(r?.error??'Connection failed.','error');
+  }
+
+  return<div className="space-y-6">
+    <div className="glass rounded-2xl p-6">
+      <h2 className="font-display text-xl text-bone">AI provider keys</h2>
+      <p className="mt-2 text-sm text-ash">These power the AI Advisor, ScentGPT, Layering, PDF import, and the Genome embeddings backfill. Setting a key here overrides your Vercel environment variable without needing a redeploy — changes take effect within about 2 minutes.</p>
+    </div>
+    {!keys?<div className="h-32 animate-pulse rounded-2xl bg-obsidian2"/>:keys.map((k:any)=>(
+      <div key={k.dbKey} className="glass rounded-2xl p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h3 className="font-display text-lg text-bone">{k.label}</h3>
+              <span className={`badge border text-2xs ${k.source==='admin'?'border-gold/30 text-gold':k.source==='env'?'border-electric/30 text-electric':'border-ember/30 text-ember'}`}>
+                {k.source==='admin'?'Set in admin':k.source==='env'?'From environment':'Not configured'}
+              </span>
+            </div>
+            <p className="mt-1.5 font-mono text-xs text-ash">{k.masked||'No key found'}</p>
+            {k.updatedAt&&<p className="mt-1 font-mono text-2xs text-ash/50">Updated {new Date(k.updatedAt).toLocaleString()}</p>}
+          </div>
+          <div className="flex gap-2">
+            {k.source!=='none'&&<button onClick={()=>testConnection(k.dbKey)} disabled={testing===k.dbKey} className="btn-ghost text-xs disabled:opacity-50">{testing===k.dbKey?'Testing…':'Test connection'}</button>}
+            {k.source==='admin'&&<button onClick={()=>revert(k.dbKey,k.label)} className="rounded-full border border-ember/30 px-3 py-1.5 text-xs text-ember hover:bg-ember/10">Revert to env</button>}
+          </div>
+        </div>
+        {editing===k.dbKey?(
+          <div className="mt-4 flex gap-2">
+            <input type="password" value={value} onChange={e=>setValue(e.target.value)} placeholder={k.dbKey==='anthropic_api_key'?'sk-ant-…':'sk-…'} className="input flex-1" autoFocus/>
+            <button onClick={()=>save(k.dbKey)} disabled={saving} className="btn-gold shrink-0 disabled:opacity-50">{saving?'Saving…':'Save'}</button>
+            <button onClick={()=>{setEditing(null);setValue('');}} className="shrink-0 text-sm text-ash">Cancel</button>
+          </div>
+        ):(
+          <button onClick={()=>{setEditing(k.dbKey);setValue('');}} className="btn-ghost mt-4 text-xs">{k.source==='none'?'Add key':'Replace key'}</button>
+        )}
+      </div>
+    ))}
+    <div className="hairline rounded-2xl p-6">
+      <p className="font-mono text-2xs uppercase tracking-wider text-ash">Not managed here</p>
+      <p className="mt-2 text-sm text-ash">Supabase connection details and the admin secret itself stay in Vercel environment variables only — they're needed before the app can even reach this database, so storing them in the database would be circular. Update those in Vercel → Settings → Environment Variables.</p>
+    </div>
   </div>;
 }

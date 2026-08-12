@@ -3,6 +3,7 @@ import { RecentlyViewedRail } from '@/components/RecentlyViewedRail';
 import { TrendingRail } from '@/components/TrendingRail';
 import { AmbientGlow } from '@/components/BottleHero';
 import { BottleMark } from '@/components/BottleMark';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 const PILLARS = [
   { num: '01', title: 'AI Fragrance Advisor', body: 'Claude reads your taste like a perfumer would — recommends from a real catalog, never a hallucinated name.', href: '/advisor' },
@@ -13,17 +14,39 @@ const PILLARS = [
   { num: '06', title: 'Decant Marketplace', body: 'Escrow-protected trading. Funds held until delivery is confirmed, released automatically 72 hours later.', href: '/marketplace' },
 ] as const;
 
-export default function HomePage() {
+async function getLiveStats() {
+  try {
+    const a = createAdminClient();
+    const count = async (table: string, filter?: (q: any) => any) => {
+      let q = a.from(table).select('*', { count: 'exact', head: true });
+      if (filter) q = filter(q);
+      const { count: c } = await q;
+      return c ?? 0;
+    };
+    const [fragrances, brands, listings] = await Promise.all([
+      count('fragrances', q => q.eq('discontinued', false)),
+      count('brands'),
+      count('partial_bottle_listings', q => q.eq('status', 'active')),
+    ]);
+    return { fragrances, brands, listings };
+  } catch {
+    return null;
+  }
+}
+
+export default async function HomePage() {
+  const stats = await getLiveStats();
+
   return (
     <div>
-      <section className="relative overflow-hidden px-4 pb-24 pt-20 sm:px-6 lg:pb-32 lg:pt-28">
+      <section className="relative overflow-hidden px-4 pb-16 pt-20 sm:px-6 lg:pb-20 lg:pt-28">
         <AmbientGlow className="left-1/2 top-0 h-[36rem] w-[36rem] -translate-x-1/2" />
         <div className="mx-auto max-w-2xl text-center">
           <div className="animate-fade-up mb-8 flex items-center justify-center gap-3">
             <BottleMark className="h-5 w-5 text-gold/70" />
           </div>
           <p className="section-label animate-fade-up mb-6">The Fragrance Operating System</p>
-          <h1 className="animate-fade-up font-display text-5xl leading-[1.06] text-bone sm:text-6xl lg:text-7xl" style={{ animationDelay: '0.1s' }}>
+          <h1 className="animate-fade-up font-display text-4xl leading-[1.08] text-bone sm:text-6xl lg:text-7xl" style={{ animationDelay: '0.1s' }}>
             Know your <span className="shimmer-text font-display italic">scent.</span>
             <br />
             Own your shelf.
@@ -38,6 +61,23 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {stats && (stats.fragrances > 0 || stats.brands > 0) && (
+        <div className="animate-fade-up px-4 pb-16 sm:px-6" style={{ animationDelay: '0.4s' }}>
+          <div className="mx-auto flex max-w-md flex-wrap items-center justify-center gap-x-10 gap-y-4 text-center">
+            {[
+              { v: stats.fragrances, l: 'Fragrances catalogued' },
+              { v: stats.brands, l: 'Brands' },
+              { v: stats.listings, l: 'Active listings' },
+            ].filter(s => s.v > 0).map(s => (
+              <div key={s.l}>
+                <p className="font-display text-2xl text-gold sm:text-3xl">{s.v.toLocaleString()}</p>
+                <p className="mt-0.5 font-mono text-2xs uppercase tracking-wider text-ash">{s.l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <TrendingRail />
       <RecentlyViewedRail />

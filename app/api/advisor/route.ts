@@ -4,10 +4,13 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
 import { sanitizeString, sanitizeNumber, sanitizeArray } from '@/lib/sanitize';
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { getSecret } from '@/lib/secrets';
 const SYS = `You are the ScentOS AI Fragrance Advisor. Only recommend fragrances from the provided candidate list. Return ONLY valid JSON: {"matches":[{"fragranceId":string,"matchScore":number,"reasoning":string}],"alternatives":[{"fragranceId":string,"reasoning":string}]}`;
 function seasons(climate: string) { if (['hot-humid','hot-dry'].includes(climate)) return ['summer','spring']; if (climate === 'cold') return ['winter','fall']; return ['spring','summer','fall','winter']; }
 export async function POST(req: NextRequest) {
+  const apiKey = await getSecret('anthropic_api_key', 'ANTHROPIC_API_KEY');
+  if (!apiKey) return NextResponse.json({ error: 'AI advisor is not configured. Set an Anthropic API key in Admin → Settings.' }, { status: 503 });
+  const anthropic = new Anthropic({ apiKey });
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown';
   if (!rateLimit(`advisor:${ip}`, 5, 60000)) return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429 });
   const raw = await req.json();

@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { checkAdminSecret } from '@/lib/adminAuth';
 import { rateLimit } from '@/lib/rateLimit';
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { getSecret } from '@/lib/secrets';
 const MAX_BASE64_LEN = 14_000_000; // ~10MB PDF
 
 const SYSTEM = `You extract fragrance/perfume catalog data from documents for ScentOS. Read the attached PDF carefully and extract every distinct perfume/fragrance you can identify.
@@ -39,6 +38,10 @@ export async function POST(req: NextRequest) {
   if (typeof body.fileBase64 !== 'string' || body.fileBase64.length > MAX_BASE64_LEN) {
     return NextResponse.json({ error: 'PDF too large (max ~10MB)' }, { status: 400 });
   }
+
+  const apiKey = await getSecret('anthropic_api_key', 'ANTHROPIC_API_KEY');
+  if (!apiKey) return NextResponse.json({ error: 'PDF import is not configured. Set an Anthropic API key in Admin → Settings.' }, { status: 503 });
+  const anthropic = new Anthropic({ apiKey });
 
   try {
     const response = await anthropic.messages.create({

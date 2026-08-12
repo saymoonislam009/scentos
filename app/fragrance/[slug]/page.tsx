@@ -9,10 +9,12 @@ import { AccordBars } from '@/components/fragrance/AccordBars';
 import { NotePyramid } from '@/components/fragrance/NotePyramid';
 import { SeasonBadges, OccasionBadges, PerfStat } from '@/components/fragrance/FragranceBadges';
 import { PriceAlertButton } from '@/components/PriceAlertButton';
+import { useToast } from '@/components/Toast';
 
 const PROJ: Record<string,string> = { intimate:'Intimate', moderate:'Moderate', strong:'Strong', 'beast-mode':'Beast mode' };
 
 export default function FragrancePage({ params }: { params: { slug: string } }) {
+  const { toast } = useToast();
   const { user } = useUser();
   const [f, setF] = useState<any>(null);
   const [brand, setBrand] = useState<any>(null);
@@ -72,6 +74,14 @@ export default function FragrancePage({ params }: { params: { slug: string } }) 
       if (!active) return;
       setF(frag); setBrand(br); setDna(d); setNotes(n ?? []); setAccords(a ?? []); setReviews(r ?? []); setGenome(eg); setLoading(false);
       if (user) fetch('/api/recently-viewed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fragranceId: frag.id }) }).catch(() => {});
+      const lowestPrice = [...pm.values()].sort((a: any, b: any) => a.price - b.price)[0]?.price;
+      if (user && lowestPrice != null) {
+        fetch('/api/alerts/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fragranceId: frag.id, lowestPrice: Number(lowestPrice) }) })
+          .then(r => r.json())
+          .then(({ triggered }) => {
+            if (triggered?.length) toast(`Price alert! ${frag.name} dropped to $${triggered[0].currentPrice} (target was $${triggered[0].targetPrice}).`, 'success');
+          }).catch(() => {});
+      }
     })();
     return () => { active = false; };
   }, [params.slug, user]);

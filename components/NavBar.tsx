@@ -75,7 +75,7 @@ export function NavBar() {
               <Link href="/sign-in" className="rounded-full border border-gold/30 bg-gold/5 px-4 py-1.5 text-sm text-gold hover:border-gold/60 hover:bg-gold/10">Sign in</Link>
             ))}
           </div>
-          <button onClick={() => setOpen(o => !o)} className="flex h-9 w-9 items-center justify-center rounded-full border border-bone/10 text-bone hover:bg-bone/5 xl:hidden">
+          <button onClick={() => setOpen(o => !o)} className="flex h-10 w-10 items-center justify-center rounded-full border border-bone/10 text-bone hover:bg-bone/5 xl:hidden">
             {open ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>

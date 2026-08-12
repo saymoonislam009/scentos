@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { checkAdminSecret } from '@/lib/adminAuth';
 import { createAdminClient } from '@/lib/supabase/admin';
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+import { getSecret } from '@/lib/secrets';
 export async function POST(req: NextRequest) {
   const d = checkAdminSecret(req); if (d) return d;
+  const apiKey = await getSecret('openai_api_key', 'OPENAI_API_KEY');
+  if (!apiKey) return NextResponse.json({ error: 'Backfill is not configured. Set an OpenAI API key in Admin → Settings.' }, { status: 503 });
+  const openai = new OpenAI({ apiKey });
   const a = createAdminClient();
   const { data: fragrances, error } = await a.from('fragrances').select('id,name,description,brands(name),fragrance_notes(notes(name)),fragrance_accords(accords(name))').is('embedding', null);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

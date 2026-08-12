@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const targetPrice = sanitizeNumber(body.targetPrice, 0, 100000);
   if (!body.fragranceId || !targetPrice) return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
-  const { data, error } = await createAdminClient().from('price_alerts').insert({ user_id: user.id, fragrance_id: body.fragranceId, target_price: targetPrice }).select().single();
+  const { data, error } = await createAdminClient().from('price_alerts').upsert({ user_id: user.id, fragrance_id: body.fragranceId, target_price: targetPrice, triggered: false, triggered_at: null }, { onConflict: 'user_id,fragrance_id' }).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }

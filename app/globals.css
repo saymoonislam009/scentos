@@ -55,7 +55,7 @@
     display: inline-flex; align-items: center; gap: 0.5rem;
     border-radius: 9999px;
     background: linear-gradient(135deg, #D9BD7A 0%, #C9A24B 50%, #B08830 100%);
-    padding: 0.625rem 1.5rem; font-size: 0.875rem; font-weight: 600;
+    padding: 0.75rem 1.5rem; font-size: 0.875rem; font-weight: 600;
     color: #0A0A09; letter-spacing: 0.01em;
     transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
     box-shadow: 0 2px 16px rgba(201,162,75,0.25);
@@ -65,7 +65,7 @@
   .btn-ghost {
     display: inline-flex; align-items: center; gap: 0.5rem;
     border-radius: 9999px; border: 1px solid rgba(237,232,223,0.15);
-    padding: 0.625rem 1.5rem; font-size: 0.875rem; color: #EDE8DF;
+    padding: 0.75rem 1.5rem; font-size: 0.875rem; color: #EDE8DF;
     transition: border-color 0.2s, background 0.2s;
   }
   .btn-ghost:hover { border-color: rgba(237,232,223,0.35); background: rgba(237,232,223,0.04); }

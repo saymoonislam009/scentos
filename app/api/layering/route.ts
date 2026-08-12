@@ -3,9 +3,12 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { getSecret } from '@/lib/secrets';
 const SYS = `Fragrance layering specialist. Return ONLY valid JSON: {"combinations":[{"layers":[{"fragranceId":string,"application":"base"|"accent","note":string}],"expectedProfile":string,"occasions":string[]}]}. Max 3 combinations using provided ids.`;
 export async function POST(req: NextRequest) {
+  const apiKey = await getSecret('anthropic_api_key', 'ANTHROPIC_API_KEY');
+  if (!apiKey) return NextResponse.json({ error: 'Layering is not configured. Set an Anthropic API key in Admin → Settings.' }, { status: 503 });
+  const anthropic = new Anthropic({ apiKey });
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown';
   if (!rateLimit(`layering:${ip}`, 5, 60000)) return NextResponse.json({ error: 'Rate limit exceeded.' }, { status: 429 });
   const { fragranceIds } = await req.json();

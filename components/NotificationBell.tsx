@@ -26,7 +26,7 @@ export function NotificationBell() {
   if (!user) return null;
   return (
     <div ref={ref} className="relative">
-      <button onClick={() => setOpen(o => !o)} className="relative flex h-9 w-9 items-center justify-center rounded-full border border-bone/10 text-ash hover:border-bone/25 hover:text-bone">
+      <button onClick={() => setOpen(o => !o)} className="relative flex h-10 w-10 items-center justify-center rounded-full border border-bone/10 text-ash hover:border-bone/25 hover:text-bone">
         <Bell size={16} />
         {inquiries.length > 0 && (
           <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[9px] font-bold text-matte">
@@ -35,7 +35,7 @@ export function NotificationBell() {
         )}
       </button>
       {open && (
-        <div className="glass absolute right-0 top-11 z-50 w-80 rounded-2xl p-3 shadow-glass">
+        <div className="glass absolute right-0 top-11 z-50 w-[calc(100vw-2rem)] max-w-80 rounded-2xl p-3 shadow-glass sm:w-80">
           <p className="mb-2 px-2 font-mono text-2xs uppercase tracking-wider text-ash">
             {inquiries.length === 0 ? 'No new requests' : `${inquiries.length} buy request${inquiries.length !== 1 ? 's' : ''}`}
           </p>

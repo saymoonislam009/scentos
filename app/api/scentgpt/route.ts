@@ -4,10 +4,13 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
 import { sanitizeString } from '@/lib/sanitize';
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { getSecret } from '@/lib/secrets';
 const SYS = `You are ScentGPT, the fragrance expert inside ScentOS. Use lookup_fragrances for real catalog data. Be concise, opinionated, and expert.`;
 const TOOLS: Anthropic.Tool[] = [{ name: 'lookup_fragrances', description: 'Search the ScentOS fragrance catalog by name.', input_schema: { type: 'object', properties: { query: { type: 'string', description: 'fragrance name to search' } }, required: ['query'] } }];
 export async function POST(req: NextRequest) {
+  const apiKey = await getSecret('anthropic_api_key', 'ANTHROPIC_API_KEY');
+  if (!apiKey) return NextResponse.json({ error: 'ScentGPT is not configured. Set an Anthropic API key in Admin → Settings.' }, { status: 503 });
+  const anthropic = new Anthropic({ apiKey });
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown';
   if (!rateLimit(`scentgpt:${ip}`, 10, 60000)) return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429 });
   const body = await req.json();
