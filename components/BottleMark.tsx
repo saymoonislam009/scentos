@@ -1,10 +1,20 @@
+/**
+ * BottleMark — a quiet, single-stroke seal, not an illustration.
+ * Used small: in the nav, and once, restrained, in the hero.
+ * No fill, no color variance, no animation — the mark of a maker,
+ * not a decoration.
+ */
 export function BottleMark({ className = 'h-4 w-4' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <rect x="10" y="2" width="4" height="3" rx="0.75" fill="currentColor" />
-      <path d="M8 8.5 L8 7.5Q8 6.3 9.2 6.3L14.8 6.3Q16 6.3 16 7.5L16 8.5Q19 11 19 14.5L19 19Q19 21 17 21L7 21Q5 21 5 19L5 14.5Q5 11 8 8.5Z"
-        fill="none" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M6 15Q6 12.5 8 10.5L16 10.5Q18 12.5 18 15L18 19Q18 20 17 20L7 20Q6 20 6 19Z" fill="currentColor" fillOpacity="0.55" />
+      <rect x="10.25" y="2" width="3.5" height="2.6" rx="0.5" stroke="currentColor" strokeWidth="1.1" />
+      <path
+        d="M8.3 8.2 L8.3 7.2 Q8.3 6.1 9.4 6.1 L14.6 6.1 Q15.7 6.1 15.7 7.2 L15.7 8.2 Q18.4 10.8 18.4 14.3 L18.4 18.8 Q18.4 20.6 16.6 20.6 L7.4 20.6 Q5.6 20.6 5.6 18.8 L5.6 14.3 Q5.6 10.8 8.3 8.2 Z"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        fill="none"
+      />
+      <line x1="6.2" y1="15.5" x2="17.8" y2="15.5" stroke="currentColor" strokeWidth="0.75" strokeOpacity="0.55" />
     </svg>
   );
 }
