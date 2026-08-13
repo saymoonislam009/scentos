@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: 'AI-powered fragrance discovery, collection tracking, and marketplace.',
   keywords: ['fragrance', 'perfume', 'oud', 'cologne', 'AI advisor'],
   openGraph: { title: 'ScentOS', description: 'Discover, collect, and trade fragrances with AI.', type: 'website' },
-  icons: { icon: [{ url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }], apple: [{ url: '/icons/apple-touch-icon.png' }] },
+  icons: { icon: [{ url: '/icons/favicon.png', sizes: '64x64', type: 'image/png' }, { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }], apple: [{ url: '/icons/apple-touch-icon.png' }] },
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'ScentOS' },
 };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, maximumScale: 1, themeColor: '#080806', viewportFit: 'cover' };

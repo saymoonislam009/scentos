@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Lock } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
 export default function EditPartialBottlePage() {
@@ -15,7 +16,7 @@ export default function EditPartialBottlePage() {
   }, [user, params.id, router]);
   async function save(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError('');
-    const { error: err } = await createClient().from('partial_bottle_listings').update({ perfume_name: form.perfume_name, brand_name: form.brand_name, days_used: form.days_used ? Number(form.days_used) : null, percent_left: Number(form.percent_left), has_box: form.has_box === true || form.has_box === 'true', price: Number(form.price), currency: form.currency, payment_method: form.payment_method, location: form.location, contact_info: form.contact_info, description: form.description }).eq('id', params.id);
+    const { error: err } = await createClient().from('partial_bottle_listings').update({ perfume_name: form.perfume_name, brand_name: form.brand_name, days_used: form.days_used ? Number(form.days_used) : null, percent_left: Number(form.percent_left), has_box: form.has_box === true || form.has_box === 'true', price: Number(form.price), currency: form.currency, payment_method: form.payment_method, location: form.location, contact_info: form.contact_info || null, show_contact_publicly: form.contact_info ? !!form.show_contact_publicly : false, description: form.description }).eq('id', params.id);
     setSaving(false); if (err) { setError(err.message); return; } router.push('/account');
   }
   if (!form) return <div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" /></div>;
@@ -34,7 +35,16 @@ export default function EditPartialBottlePage() {
           <label className="block"><span className="mb-1.5 block font-mono text-2xs uppercase tracking-wider text-ash">Currency</span><select value={form.currency} onChange={e => upd('currency', e.target.value)} className="input"><option value="BDT">BDT</option><option value="USD">USD</option></select></label>
           <label className="block"><span className="mb-1.5 block font-mono text-2xs uppercase tracking-wider text-ash">Payment</span><select value={form.payment_method} onChange={e => upd('payment_method', e.target.value)} className="input"><option value="online">Online</option><option value="face-to-face">Face to face</option><option value="both">Either</option></select></label>
           <label className="block"><span className="mb-1.5 block font-mono text-2xs uppercase tracking-wider text-ash">Location</span><input value={form.location ?? ''} onChange={e => upd('location', e.target.value)} className="input" /></label>
-          <label className="block"><span className="mb-1.5 block font-mono text-2xs uppercase tracking-wider text-ash">Contact info *</span><input required value={form.contact_info ?? ''} onChange={e => upd('contact_info', e.target.value)} className="input" /></label>
+          <div className="sm:col-span-2 rounded-xl border border-bone/[0.08] p-4">
+            <label className="block"><span className="mb-1.5 block font-mono text-2xs uppercase tracking-wider text-ash">Contact info (optional)</span><input value={form.contact_info ?? ''} onChange={e => upd('contact_info', e.target.value)} className="input" placeholder="WhatsApp: 01XXXXXXXXX" /></label>
+            {form.contact_info && (
+              <label className="mt-3 flex flex-wrap items-center gap-2.5 text-sm text-ash">
+                <input type="checkbox" checked={!!form.show_contact_publicly} onChange={e => upd('show_contact_publicly', e.target.checked)} className="h-4 w-4 accent-gold" />
+                Show this publicly on the listing
+                {!form.show_contact_publicly && <span className="flex items-center gap-1 text-2xs text-gold"><Lock size={10} />Private</span>}
+              </label>
+            )}
+          </div>
           <label className="block sm:col-span-2"><span className="mb-1.5 block font-mono text-2xs uppercase tracking-wider text-ash">Description</span><textarea rows={3} value={form.description ?? ''} onChange={e => upd('description', e.target.value)} className="input resize-none" /></label>
         </div>
         {error && <p className="mt-4 text-sm text-ember">{error}</p>}

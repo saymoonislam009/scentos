@@ -1,25 +1,45 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MapPin, Flag } from 'lucide-react';
+import { MapPin, Flag, MessageCircle, Lock } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
 import { usePrompt } from '@/components/ui/ConfirmProvider';
+import { useToast } from '@/components/Toast';
+import { findOrCreateConversation } from '@/lib/conversations';
+
 const PM: Record<string,string> = { online:'Online payment','face-to-face':'Face to face', both:'Either' };
+
 export default function PartialBottlesPage() {
   const { user } = useUser();
+  const router = useRouter();
   const promptDialog = usePrompt();
+  const { toast } = useToast();
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioning, setActioning] = useState<string|null>(null);
+  const [messaging, setMessaging] = useState<string|null>(null);
   const [notice, setNotice] = useState('');
   const [search, setSearch] = useState('');
+
   function refresh() { setLoading(true); createClient().from('partial_bottle_listings').select('*,profiles(name)').eq('status','active').order('created_at',{ascending:false}).then(({data})=>{setListings(data??[]);setLoading(false);}); }
   useEffect(refresh, []);
+
   async function requestToBuy(id: string) {
     if (!user) return; setActioning(id);
     const { error } = await createClient().from('partial_listing_inquiries').insert({ listing_id: id, buyer_id: user.id });
     setActioning(null); setNotice(error ? `Error: ${error.message}` : 'Request sent — the seller will be notified.');
+  }
+  async function messageSeller(l: any) {
+    if (!user) { router.push('/sign-in'); return; }
+    setMessaging(l.id);
+    try {
+      const convoId = await findOrCreateConversation(l.seller_id, l.id, user.id);
+      router.push(`/messages/${convoId}`);
+    } catch (e: any) {
+      toast(e.message ?? 'Could not start conversation.', 'error');
+    } finally { setMessaging(null); }
   }
   async function report(id: string, sellerId: string) {
     if (!user) return;
@@ -28,14 +48,16 @@ export default function PartialBottlesPage() {
     await createClient().from('reports').insert({ reporter_id: user.id, listing_id: id, reported_user_id: sellerId, reason });
     setNotice('Report sent. Thank you.');
   }
+
   const filtered = listings.filter(l => !search || l.perfume_name.toLowerCase().includes(search.toLowerCase()) || (l.brand_name||'').toLowerCase().includes(search.toLowerCase()) || (l.location||'').toLowerCase().includes(search.toLowerCase()));
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
       <div className="flex flex-wrap items-start justify-between gap-6">
         <div>
           <p className="section-label mb-3">Used Bottle Marketplace</p>
           <h1 className="font-display text-4xl text-bone sm:text-5xl">Partial bottles,<br/>sold directly.</h1>
-          <p className="mt-4 max-w-lg text-sm leading-relaxed text-ash">Sellers list their contact info and arrange payment directly. Anyone can browse. An account is only needed to request a purchase.</p>
+          <p className="mt-4 max-w-lg text-sm leading-relaxed text-ash">Message sellers directly in-app, or arrange payment however you like. Anyone can browse — an account is only needed to message or request a purchase.</p>
         </div>
         <Link href={user ? '/partial-bottles/new' : '/sign-in'} className="btn-gold shrink-0">Sell a bottle</Link>
       </div>
@@ -60,17 +82,22 @@ export default function PartialBottlesPage() {
               {l.description && <p className="mt-3 text-sm leading-relaxed text-ash line-clamp-2">{l.description}</p>}
               <div className="mt-4 rounded-xl border border-bone/[0.06] bg-obsidian2 px-3 py-2.5">
                 <p className="text-xs text-ash">Seller: <span className="text-bone">{(l.profiles as any)?.name ?? 'Anonymous'}</span></p>
-                <p className="mt-0.5 text-xs text-electric">{l.contact_info}</p>
+                {l.show_contact_publicly && l.contact_info ? (
+                  <p className="mt-0.5 text-xs text-electric">{l.contact_info}</p>
+                ) : (
+                  <p className="mt-0.5 flex items-center gap-1 text-xs text-ash/60"><Lock size={10} />Contact private — message in-app</p>
+                )}
               </div>
               <div className="mt-4 flex gap-2">
                 {user ? user.id === l.seller_id ? (
                   <Link href={`/partial-bottles/${l.id}/edit`} className="btn-ghost flex-1 justify-center text-xs">Edit</Link>
                 ) : (
                   <>
-                    <button onClick={() => requestToBuy(l.id)} disabled={actioning === l.id} className="btn-gold flex-1 justify-center text-xs disabled:opacity-50">{actioning === l.id ? 'Sending…' : 'Request to buy'}</button>
+                    <button onClick={() => messageSeller(l)} disabled={messaging === l.id} className="btn-gold flex-1 justify-center text-xs disabled:opacity-50"><MessageCircle size={12} />{messaging === l.id ? 'Opening…' : 'Message'}</button>
+                    <button onClick={() => requestToBuy(l.id)} disabled={actioning === l.id} className="btn-ghost flex-1 justify-center text-xs disabled:opacity-50">{actioning === l.id ? '…' : 'Request to buy'}</button>
                     <button onClick={() => report(l.id, l.seller_id)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-bone/10 text-ash/50 hover:border-ember/30 hover:text-ember" title="Report"><Flag size={13} /></button>
                   </>
-                ) : <Link href="/sign-in" className="btn-ghost w-full justify-center text-xs">Sign in to request</Link>}
+                ) : <Link href="/sign-in" className="btn-ghost w-full justify-center text-xs">Sign in to message</Link>}
               </div>
             </div>
           ))}

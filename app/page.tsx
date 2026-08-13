@@ -8,7 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 const PILLARS = [
   { num: '01', title: 'AI Fragrance Advisor', body: 'Claude reads your taste like a perfumer would — recommends from a real catalog, never a hallucinated name.', href: '/advisor' },
   { num: '02', title: 'Fragrance Database', body: 'The full catalog with DNA scoring, note pyramids, accord bars, and Genome similarity matching.', href: '/database' },
-  { num: '03', title: 'Used Bottle Market', body: 'Casual classifieds for partial bottles. Browse freely — an account is only needed to request a purchase.', href: '/partial-bottles' },
+  { num: '03', title: 'Used Bottle Market', body: 'Casual classifieds for partial bottles. Message sellers directly in-app — sharing a phone number is always optional.', href: '/partial-bottles' },
   { num: '04', title: 'ScentGPT', body: 'A chat expert that looks up real notes and prices before it answers. Ask it anything.', href: '/scentgpt' },
   { num: '05', title: 'Collection & Layering', body: 'Track every bottle and decant, then get AI-composed layering combinations from what you already own.', href: '/collection' },
   { num: '06', title: 'Decant Marketplace', body: 'Escrow-protected trading. Funds held until delivery is confirmed, released automatically 72 hours later.', href: '/marketplace' },
@@ -59,8 +59,26 @@ export default async function HomePage() {
             <Link href="/advisor" className="btn-gold text-sm sm:text-base">Find My Fragrance</Link>
             <Link href="/database" className="btn-ghost text-sm sm:text-base">Explore Catalog</Link>
           </div>
+          <p className="animate-fade-up mt-5 font-mono text-2xs text-ash/60" style={{ animationDelay: '0.35s' }}>
+            Free to browse. No account needed until you buy, sell, or save something. <Link href="/quiz" className="text-gold/80 hover:text-gold hover:underline">Not sure yet? Take the 30-second quiz →</Link>
+          </p>
         </div>
       </section>
+
+      <div className="animate-fade-up px-4 pb-10 sm:px-6" style={{ animationDelay: '0.38s' }}>
+        <div className="mx-auto flex max-w-lg flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          {[
+            { l: 'Privacy-first messaging' },
+            { l: 'Escrow-protected trades' },
+            { l: 'Catalog-grounded AI' },
+          ].map(t => (
+            <div key={t.l} className="flex items-center gap-2 text-xs text-ash">
+              <span className="h-1 w-1 rounded-full bg-gold/60" />
+              {t.l}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {stats && (stats.fragrances > 0 || stats.brands > 0) && (
         <div className="animate-fade-up px-4 pb-16 sm:px-6" style={{ animationDelay: '0.4s' }}>
@@ -108,9 +126,9 @@ export default async function HomePage() {
 
       <section className="px-4 py-28 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="section-label mb-4">No account needed to browse</p>
+          <p className="section-label mb-4">Your number stays yours</p>
           <h2 className="font-display text-3xl text-bone sm:text-4xl">Selling a partial bottle?</h2>
-          <p className="mx-auto mt-4 max-w-md text-ash">List your perfume name, days used, percent remaining, payment preference, and contact info. Anyone can browse — an account is only needed to request a purchase.</p>
+          <p className="mx-auto mt-4 max-w-md text-ash">List your perfume name, days used, percent remaining, and payment preference. Buyers message you in-app — sharing a phone number is entirely optional.</p>
           <div className="mt-9 flex flex-wrap justify-center gap-4">
             <Link href="/partial-bottles/new" className="btn-gold">List a bottle</Link>
             <Link href="/partial-bottles" className="btn-ghost">Browse listings</Link>

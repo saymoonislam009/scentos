@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useUser } from '@/lib/useUser';
 import { signOut } from '@/app/auth/actions';
 import { NotificationBell } from '@/components/NotificationBell';
+import { MessagesBell } from '@/components/MessagesBell';
 
 const LINKS = [
   { href: '/advisor', label: 'Advisor', icon: Sparkles },
@@ -62,6 +63,7 @@ export function NavBar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {!loading && user && <MessagesBell />}
           {!loading && user && <NotificationBell />}
           <div className="hidden sm:flex sm:items-center sm:gap-2">
             {!loading && (user ? (
