@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { MessageCircle } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
+import { useToast } from '@/components/Toast';
 
 export default function MessagesInboxPage() {
   const { user, loading: ul } = useUser();
+  const { toast } = useToast();
   const [conversations, setConversations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,11 +18,13 @@ export default function MessagesInboxPage() {
     const s = createClient();
     let active = true;
     async function load() {
-      const { data: convos } = await s.from('conversations')
+      const { data: convos, error } = await s.from('conversations')
         .select('*,partial_bottle_listings(perfume_name),buyer:buyer_id(name,email),seller:seller_id(name,email)')
         .or(`buyer_id.eq.${user!.id},seller_id.eq.${user!.id}`)
         .order('last_message_at', { ascending: false });
-      if (!active || !convos) { setLoading(false); return; }
+      if (!active) return;
+      if (error) { toast(`Couldn't load messages: ${error.message}`, 'error'); setLoading(false); return; }
+      if (!convos) { setLoading(false); return; }
       const ids = convos.map((c: any) => c.id);
       let unreadMap = new Map<string, number>();
       let lastMsgMap = new Map<string, any>();

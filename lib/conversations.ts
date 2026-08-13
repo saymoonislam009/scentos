@@ -10,7 +10,8 @@ export async function findOrCreateConversation(sellerId: string, listingId: stri
 
   let query = s.from('conversations').select('id').eq('buyer_id', myUserId).eq('seller_id', sellerId);
   query = listingId ? query.eq('listing_id', listingId) : query.is('listing_id', null);
-  const { data: existing } = await query.maybeSingle();
+  const { data: existing, error: findError } = await query.maybeSingle();
+  if (findError) throw new Error(findError.message);
   if (existing) return existing.id;
 
   const { data: created, error } = await s.from('conversations')

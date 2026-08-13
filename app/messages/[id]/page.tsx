@@ -5,24 +5,27 @@ import Link from 'next/link';
 import { Send, ArrowLeft } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
+import { useToast } from '@/components/Toast';
 
 export default function ConversationPage() {
   const params = useParams();
   const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : params.id as string;
   const { user, loading: ul } = useUser();
+  const { toast } = useToast();
   const [conversation, setConversation] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const endRef = useRef<HTMLDivElement>(null);
-  const bodyRef = useRef<HTMLDivElement>(null);
 
   async function loadMessages(markRead: boolean) {
     const s = createClient();
-    const { data: msgs } = await s.from('messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true }).limit(200);
+    const { data: msgs, error } = await s.from('messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true }).limit(200);
+    if (error) { toast(`Couldn't refresh messages: ${error.message}`, 'error'); return; }
     setMessages(msgs ?? []);
     if (markRead && user && msgs?.length) {
       const unreadIds = msgs.filter((m: any) => m.sender_id !== user.id && !m.read_at).map((m: any) => m.id);
@@ -36,10 +39,11 @@ export default function ConversationPage() {
     const s = createClient();
     let active = true;
     async function init() {
-      const { data: convo } = await s.from('conversations')
-        .select('*,partial_bottle_listings(perfume_name,slug),buyer:buyer_id(name,email),seller:seller_id(name,email)')
+      const { data: convo, error } = await s.from('conversations')
+        .select('*,partial_bottle_listings(perfume_name),buyer:buyer_id(name,email),seller:seller_id(name,email)')
         .eq('id', id).maybeSingle();
       if (!active) return;
+      if (error) { setLoadError(error.message); setLoading(false); return; }
       if (!convo || (convo.buyer_id !== user!.id && convo.seller_id !== user!.id)) { setNotFound(true); setLoading(false); return; }
       setConversation(convo);
       await loadMessages(true);
@@ -57,10 +61,14 @@ export default function ConversationPage() {
     if (!input.trim() || !user || sending) return;
     setSending(true);
     const body = input.trim();
-    setInput('');
     const s = createClient();
     const { error } = await s.from('messages').insert({ conversation_id: id, sender_id: user.id, body });
-    if (!error) await loadMessages(false);
+    if (error) {
+      toast(`Message not sent: ${error.message}`, 'error');
+    } else {
+      setInput('');
+      await loadMessages(false);
+    }
     setSending(false);
   }
 
@@ -71,9 +79,17 @@ export default function ConversationPage() {
       <Link href="/sign-in" className="btn-gold mt-6 inline-flex">Sign in</Link>
     </div>
   );
+  if (loadError) return (
+    <div className="mx-auto max-w-md px-4 py-32 text-center">
+      <p className="font-display text-2xl text-bone">Couldn&rsquo;t load this conversation.</p>
+      <p className="mt-2 text-sm text-ember">{loadError}</p>
+      <Link href="/messages" className="mt-4 inline-block text-sm text-electric hover:underline">← Messages</Link>
+    </div>
+  );
   if (notFound) return (
     <div className="mx-auto max-w-md px-4 py-32 text-center">
       <p className="font-display text-2xl text-bone">Conversation not found.</p>
+      <p className="mt-2 text-sm text-ash">Either it doesn&rsquo;t exist, or it belongs to someone else.</p>
       <Link href="/messages" className="mt-4 inline-block text-sm text-electric hover:underline">← Messages</Link>
     </div>
   );
@@ -89,11 +105,11 @@ export default function ConversationPage() {
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold/12 text-gold font-display">{(other?.name ?? other?.email ?? '?').charAt(0).toUpperCase()}</div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-bone">{other?.name ?? other?.email ?? 'Unknown'}</p>
-          {listing && <Link href={`/partial-bottles`} className="truncate text-xs text-gold/70 hover:underline">{listing.perfume_name}</Link>}
+          {listing && <Link href="/partial-bottles" className="truncate text-xs text-gold/70 hover:underline">{listing.perfume_name}</Link>}
         </div>
       </div>
 
-      <div ref={bodyRef} className="flex-1 overflow-y-auto py-5">
+      <div className="flex-1 overflow-y-auto py-5">
         {messages.length === 0 ? (
           <p className="py-10 text-center text-sm text-ash">Say hello — ask about condition, batch, or arrange a meetup.</p>
         ) : (
