@@ -45,9 +45,9 @@ export default function MarketplacePage() {
         <div><p className="section-label mb-3">Decant Marketplace</p><h1 className="font-display text-4xl text-bone sm:text-5xl">Buy, sell, trade.</h1></div>
         {user && <button onClick={() => setShowForm(s => !s)} className="btn-gold shrink-0">{showForm ? 'Cancel' : 'List a decant'}</button>}
       </div>
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
         {[{I:ShieldCheck,l:'Escrow protected'},{I:Clock,l:'72h auto-release'},{I:Package,l:'Dispute support'}].map(({I,l}) => (
-          <div key={l} className="glass rounded-xl p-3 text-center"><I size={16} className="mx-auto text-gold" /><p className="mt-1.5 font-mono text-2xs text-ash">{l}</p></div>
+          <div key={l} className="glass rounded-xl p-2.5 text-center sm:p-3"><I size={16} className="mx-auto text-gold" /><p className="mt-1.5 font-mono text-[0.6rem] leading-tight text-ash sm:text-2xs">{l}</p></div>
         ))}
       </div>
       {!user && <div className="glass mt-5 rounded-xl p-4 text-sm text-ash"><Link href="/sign-in" className="text-gold">Sign in</Link> to buy or list.</div>}

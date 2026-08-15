@@ -18,12 +18,12 @@ export default function AdminPage(){
   if(!authed)return<div className="flex min-h-[60vh] items-center justify-center"><div className="text-center"><div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent"/><p className="text-sm text-ash">Verifying…</p></div></div>;
   const TABS:{id:Tab;label:string}[]=[{id:'overview',label:'Overview'},{id:'fragrances',label:'Fragrances'},{id:'prices',label:'Prices'},{id:'orders',label:'Orders'},{id:'users',label:'Users'},{id:'partial-listings',label:'Used Bottles'},{id:'reports',label:'Reports'},{id:'import',label:'Import'},{id:'settings',label:'Settings'}];
   return(
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <div className="flex items-center justify-between"><div><p className="section-label mb-1">Private</p><h1 className="font-display text-3xl text-bone">Admin Panel</h1></div><span className="font-mono text-2xs text-ash">ScentOS</span></div>
-      <div className="mt-8 flex flex-wrap gap-1 border-b border-bone/[0.07]">
-        {TABS.map(t=><button key={t.id} onClick={()=>setTab(t.id)} className={`px-3 py-2.5 text-sm transition-colors ${tab===t.id?'border-b-2 border-gold text-bone':'text-ash hover:text-bone'}`}>{t.label}</button>)}
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+      <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="section-label mb-1">Private</p><h1 className="font-display text-2xl text-bone sm:text-3xl">Admin Panel</h1></div><span className="font-mono text-2xs text-ash">ScentOS</span></div>
+      <div className="scrollbar-none -mx-4 mt-6 flex gap-1 overflow-x-auto border-b border-bone/[0.07] px-4 sm:mx-0 sm:mt-8 sm:flex-wrap sm:px-0">
+        {TABS.map(t=><button key={t.id} onClick={()=>setTab(t.id)} className={`shrink-0 whitespace-nowrap px-3 py-2.5 text-sm transition-colors ${tab===t.id?'border-b-2 border-gold text-bone':'text-ash hover:text-bone'}`}>{t.label}</button>)}
       </div>
-      <div className="mt-8">
+      <div className="mt-6 sm:mt-8">
         {tab==='overview'&&<Overview secret={secret}/>}
         {tab==='fragrances'&&<Fragrances secret={secret}/>}
         {tab==='prices'&&<Prices secret={secret}/>}
@@ -37,14 +37,14 @@ export default function AdminPage(){
     </div>
   );
 }
-function StatCard({label,value}:{label:string;value:any}){return<div className="glass rounded-2xl p-5"><p className="font-mono text-2xs uppercase tracking-wider text-ash">{label}</p><p className="mt-2 font-display text-3xl text-gold">{value}</p></div>;}
+function StatCard({label,value}:{label:string;value:any}){return<div className="glass rounded-2xl p-4 sm:p-5"><p className="font-mono text-2xs uppercase tracking-wider text-ash">{label}</p><p className="mt-2 font-display text-2xl text-gold sm:text-3xl">{value}</p></div>;}
 function Overview({secret}:{secret:string}){
   const[stats,setStats]=useState<any>(null);const[bfl,setBfl]=useState(false);const[msg,setMsg]=useState('');
   useEffect(()=>{af('/api/admin/stats',secret).then(setStats);},[secret]);
   async function backfill(){setBfl(true);setMsg('');const r=await af('/api/admin/backfill-embeddings',secret,{method:'POST'}).catch(()=>null);setMsg(r?`Updated ${r.updated}/${r.total??0} fragrances.`:'Failed — check OPENAI_API_KEY.');setBfl(false);}
   if(!stats)return<div className="h-48 animate-pulse rounded-2xl bg-obsidian2"/>;
   return<div className="space-y-6">
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><StatCard label="Fragrances" value={stats.fragrances}/><StatCard label="Brands" value={stats.brands}/><StatCard label="Users" value={stats.users}/><StatCard label="Orders" value={stats.orders}/><StatCard label="Active decant listings" value={stats.activeListings}/><StatCard label="Used bottle listings" value={stats.partialListings}/><StatCard label="Reviews" value={stats.reviews}/><StatCard label="Open reports" value={stats.openReports}/></div>
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"><StatCard label="Fragrances" value={stats.fragrances}/><StatCard label="Brands" value={stats.brands}/><StatCard label="Users" value={stats.users}/><StatCard label="Orders" value={stats.orders}/><StatCard label="Active decant listings" value={stats.activeListings}/><StatCard label="Used bottle listings" value={stats.partialListings}/><StatCard label="Reviews" value={stats.reviews}/><StatCard label="Open reports" value={stats.openReports}/></div>
     <div className="grid gap-4 lg:grid-cols-2">
       <div className="glass rounded-2xl p-6"><h2 className="mb-4 font-display text-lg text-bone">Top brands by catalog size</h2><TopBrandsChart data={stats.topBrands??[]}/></div>
       <div className="glass rounded-2xl p-6"><h2 className="mb-4 font-display text-lg text-bone">Collection activity — 14 days</h2><ActivityTrendChart data={stats.activityTrend??[]}/></div>
@@ -68,8 +68,25 @@ function Fragrances({secret}:{secret:string}){
     <form onSubmit={create} className="glass rounded-2xl p-6"><h2 className="mb-4 font-display text-lg text-bone">Add fragrance manually</h2><div className="grid gap-3 sm:grid-cols-3">{(['name','brandName','concentration','priceTierUsd','releaseYear','longevityHrs','seasons','occasions'] as const).map((k,i)=>{const l=['Name *','Brand *','Concentration','Price tier (USD)','Release year','Longevity (hrs)','Seasons (spring,summer…)','Occasions (office,casual…)'][i];const req=i<2;const t=['releaseYear','longevityHrs','priceTierUsd'].includes(k)?'number':'text';return(<label key={k} className="block"><span className="mb-1 block font-mono text-2xs uppercase tracking-wider text-ash">{l}</span><input type={t} required={req} value={(form as any)[k]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} className="input"/></label>);})}<label className="block"><span className="mb-1 block font-mono text-2xs uppercase tracking-wider text-ash">Projection</span><select value={form.projection} onChange={e=>setForm(f=>({...f,projection:e.target.value}))} className="input"><option value="">—</option><option value="intimate">Intimate</option><option value="moderate">Moderate</option><option value="strong">Strong</option><option value="beast-mode">Beast mode</option></select></label></div><label className="mt-3 block"><span className="mb-1 block font-mono text-2xs uppercase tracking-wider text-ash">Description</span><textarea rows={2} value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} className="input resize-none"/></label>{error&&<p className="mt-3 text-sm text-ember">{error}</p>}<button type="submit" className="btn-gold mt-4">Add fragrance</button>
       {justCreatedId&&<div className="mt-4 flex items-center gap-3 rounded-xl border border-electric/25 bg-electric/[0.06] px-4 py-3"><p className="flex-1 text-sm text-bone">Fragrance added. Add notes and accords now?</p><button type="button" onClick={()=>{setNotesEditingId(justCreatedId);setJustCreatedId(null);}} className="btn-electric text-xs !py-1.5 !px-3">Add now</button><button type="button" onClick={()=>setJustCreatedId(null)} className="text-xs text-ash">Later</button></div>}
     </form>
-    <div className="glass rounded-2xl p-4"><div className="mb-4 flex items-center gap-3"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" className="input max-w-xs"/><p className="text-sm text-ash">{filtered.length}</p></div>
-      {loading?<div className="space-y-2">{[...Array(5)].map((_,i)=><div key={i} className="h-10 animate-pulse rounded-lg bg-obsidian2"/>)}</div>:<div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Name','Brand','Type','Price','Emb','Status',''].map(h=><th key={h} className="pb-3 pr-4 font-mono text-2xs uppercase tracking-wider text-ash">{h}</th>)}</tr></thead><tbody>{filtered.map(f=><tr key={f.id} className="border-b border-bone/[0.04] hover:bg-bone/[0.02]"><td className="py-2.5 pr-4 text-bone">{f.name}</td><td className="py-2.5 pr-4 text-ash">{f.brands?.name}</td><td className="py-2.5 pr-4 font-mono text-xs text-ash">{f.concentration||'—'}</td><td className="py-2.5 pr-4 font-mono text-xs text-ash">{f.price_tier_usd?`$${f.price_tier_usd}`:'—'}</td><td className="py-2.5 pr-4">{f.embedding?<span className="text-electric">✓</span>:<span className="text-ash/40">—</span>}</td><td className="py-2.5 pr-4"><button onClick={()=>af(`/api/admin/fragrances/${f.id}`,secret,{method:'PATCH',body:JSON.stringify({toggleDiscontinued:true})}).then(refresh)} className={`font-mono text-2xs ${f.discontinued?'text-ember':'text-electric'}`}>{f.discontinued?'Disc.':'Active'}</button></td><td className="py-2.5 text-right"><button onClick={()=>setNotesEditingId(f.id)} className="mr-3 text-xs text-electric hover:underline">Notes/Accords</button><button onClick={()=>setEditing(f)} className="mr-3 text-xs text-bone hover:text-gold">Edit</button><button onClick={async()=>{const ok=await confirmDialog({title:'Delete fragrance',message:`Permanently delete "${f.name}"? This also removes its notes, accords, and price history.`,confirmLabel:'Delete',danger:true});if(!ok)return;const r=await af(`/api/admin/fragrances/${f.id}`,secret,{method:'DELETE'});if(r?.error){toast(r.error,'error');return;}toast('Fragrance deleted.','success');refresh();}} className="text-xs text-ember">Del</button></td></tr>)}</tbody></table></div>}
+    <div className="glass rounded-2xl p-4"><div className="mb-4 flex flex-wrap items-center gap-3"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" className="input max-w-xs"/><p className="text-sm text-ash">{filtered.length}</p></div>
+      {loading?<div className="space-y-2">{[...Array(5)].map((_,i)=><div key={i} className="h-10 animate-pulse rounded-lg bg-obsidian2"/>)}</div>:<>
+      <div className="hidden overflow-x-auto sm:block"><table className="w-full text-left text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Name','Brand','Type','Price','Emb','Status',''].map(h=><th key={h} className="pb-3 pr-4 font-mono text-2xs uppercase tracking-wider text-ash">{h}</th>)}</tr></thead><tbody>{filtered.map(f=><tr key={f.id} className="border-b border-bone/[0.04] hover:bg-bone/[0.02]"><td className="py-2.5 pr-4 text-bone">{f.name}</td><td className="py-2.5 pr-4 text-ash">{f.brands?.name}</td><td className="py-2.5 pr-4 font-mono text-xs text-ash">{f.concentration||'—'}</td><td className="py-2.5 pr-4 font-mono text-xs text-ash">{f.price_tier_usd?`$${f.price_tier_usd}`:'—'}</td><td className="py-2.5 pr-4">{f.embedding?<span className="text-electric">✓</span>:<span className="text-ash/40">—</span>}</td><td className="py-2.5 pr-4"><button onClick={()=>af(`/api/admin/fragrances/${f.id}`,secret,{method:'PATCH',body:JSON.stringify({toggleDiscontinued:true})}).then(refresh)} className={`font-mono text-2xs ${f.discontinued?'text-ember':'text-electric'}`}>{f.discontinued?'Disc.':'Active'}</button></td><td className="py-2.5 text-right"><button onClick={()=>setNotesEditingId(f.id)} className="mr-3 text-xs text-electric hover:underline">Notes/Accords</button><button onClick={()=>setEditing(f)} className="mr-3 text-xs text-bone hover:text-gold">Edit</button><button onClick={async()=>{const ok=await confirmDialog({title:'Delete fragrance',message:`Permanently delete "${f.name}"? This also removes its notes, accords, and price history.`,confirmLabel:'Delete',danger:true});if(!ok)return;const r=await af(`/api/admin/fragrances/${f.id}`,secret,{method:'DELETE'});if(r?.error){toast(r.error,'error');return;}toast('Fragrance deleted.','success');refresh();}} className="text-xs text-ember">Del</button></td></tr>)}</tbody></table></div>
+      <div className="space-y-2.5 sm:hidden">{filtered.map(f=>(
+        <div key={f.id} className="rounded-xl border border-bone/[0.06] bg-obsidian2 p-3.5">
+          <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-bone">{f.name}</p><p className="mt-0.5 truncate text-xs text-ash">{f.brands?.name}</p></div><button onClick={()=>af(`/api/admin/fragrances/${f.id}`,secret,{method:'PATCH',body:JSON.stringify({toggleDiscontinued:true})}).then(refresh)} className={`shrink-0 font-mono text-2xs ${f.discontinued?'text-ember':'text-electric'}`}>{f.discontinued?'Disc.':'Active'}</button></div>
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-2xs text-ash">
+            {f.concentration&&<span>{f.concentration}</span>}
+            {f.price_tier_usd&&<span className="text-gold">${f.price_tier_usd}</span>}
+            <span className={f.embedding?'text-electric':'text-ash/40'}>{f.embedding?'✓ embedded':'no embedding'}</span>
+          </div>
+          <div className="mt-3 flex gap-4 border-t border-bone/[0.06] pt-2.5 text-xs">
+            <button onClick={()=>setNotesEditingId(f.id)} className="text-electric">Notes/Accords</button>
+            <button onClick={()=>setEditing(f)} className="text-bone">Edit</button>
+            <button onClick={async()=>{const ok=await confirmDialog({title:'Delete fragrance',message:`Permanently delete "${f.name}"? This also removes its notes, accords, and price history.`,confirmLabel:'Delete',danger:true});if(!ok)return;const r=await af(`/api/admin/fragrances/${f.id}`,secret,{method:'DELETE'});if(r?.error){toast(r.error,'error');return;}toast('Fragrance deleted.','success');refresh();}} className="ml-auto text-ember">Delete</button>
+          </div>
+        </div>
+      ))}</div>
+      </>}
     </div>
     {notesEditingId&&<NotesAccordsEditor fragranceId={notesEditingId} secret={secret} onClose={()=>setNotesEditingId(null)}/>}
   </div>;
@@ -90,13 +107,38 @@ function Orders({secret}:{secret:string}){
   useEffect(()=>{af('/api/admin/orders',secret).then(setOrders).finally(()=>setLoading(false));},[secret]);
   if(loading)return<div className="h-48 animate-pulse rounded-2xl bg-obsidian2"/>;
   if(!orders.length)return<p className="text-ash">No orders yet.</p>;
-  return<div className="glass rounded-2xl p-4 overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Fragrance','Buyer','Seller','Amount','Status','Date'].map(h=><th key={h} className="pb-3 pr-4 text-left font-mono text-2xs uppercase text-ash">{h}</th>)}</tr></thead><tbody>{orders.map(o=><tr key={o.id} className="border-b border-bone/[0.04]"><td className="py-2.5 pr-4 text-bone">{(o.decant_listings as any)?.fragrances?.name??'—'}</td><td className="py-2.5 pr-4 text-ash">{(o.buyer as any)?.email??'—'}</td><td className="py-2.5 pr-4 text-ash">{(o.seller as any)?.email??'—'}</td><td className="py-2.5 pr-4 font-mono text-gold">${Number(o.amount).toFixed(2)}</td><td className="py-2.5 pr-4 font-mono text-2xs text-ash">{o.status}</td><td className="py-2.5 text-xs text-ash">{new Date(o.created_at).toLocaleDateString()}</td></tr>)}</tbody></table></div>;
+  return<div className="glass rounded-2xl p-4">
+    <div className="hidden overflow-x-auto sm:block"><table className="w-full text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Fragrance','Buyer','Seller','Amount','Status','Date'].map(h=><th key={h} className="pb-3 pr-4 text-left font-mono text-2xs uppercase text-ash">{h}</th>)}</tr></thead><tbody>{orders.map(o=><tr key={o.id} className="border-b border-bone/[0.04]"><td className="py-2.5 pr-4 text-bone">{(o.decant_listings as any)?.fragrances?.name??'—'}</td><td className="py-2.5 pr-4 text-ash">{(o.buyer as any)?.email??'—'}</td><td className="py-2.5 pr-4 text-ash">{(o.seller as any)?.email??'—'}</td><td className="py-2.5 pr-4 font-mono text-gold">${Number(o.amount).toFixed(2)}</td><td className="py-2.5 pr-4 font-mono text-2xs text-ash">{o.status}</td><td className="py-2.5 text-xs text-ash">{new Date(o.created_at).toLocaleDateString()}</td></tr>)}</tbody></table></div>
+    <div className="space-y-2.5 sm:hidden">{orders.map(o=>(
+      <div key={o.id} className="rounded-xl border border-bone/[0.06] bg-obsidian2 p-3.5">
+        <div className="flex items-start justify-between gap-3"><p className="min-w-0 truncate text-bone">{(o.decant_listings as any)?.fragrances?.name??'—'}</p><p className="shrink-0 font-mono text-gold">${Number(o.amount).toFixed(2)}</p></div>
+        <div className="mt-1.5 space-y-0.5 text-xs text-ash"><p>Buyer: {(o.buyer as any)?.email??'—'}</p><p>Seller: {(o.seller as any)?.email??'—'}</p></div>
+        <div className="mt-2.5 flex items-center justify-between border-t border-bone/[0.06] pt-2.5 font-mono text-2xs"><span className="text-ash">{o.status}</span><span className="text-ash/70">{new Date(o.created_at).toLocaleDateString()}</span></div>
+      </div>
+    ))}</div>
+  </div>;
 }
 function Users({secret}:{secret:string}){
   const[users,setUsers]=useState<any[]>([]);const[loading,setLoading]=useState(true);const[search,setSearch]=useState('');
   useEffect(()=>{af('/api/admin/users',secret).then(setUsers).finally(()=>setLoading(false));},[secret]);
   const filtered=users.filter(u=>(u.email||'').toLowerCase().includes(search.toLowerCase())||(u.name||'').toLowerCase().includes(search.toLowerCase()));
-  return<div className="space-y-4"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" className="input max-w-sm"/><div className="glass rounded-2xl p-4 overflow-x-auto">{loading?<div className="h-48 animate-pulse rounded-xl bg-obsidian2"/>:<table className="w-full text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Name','Email','Country','Collection','Reviews','Joined'].map(h=><th key={h} className="pb-3 pr-4 text-left font-mono text-2xs uppercase text-ash">{h}</th>)}</tr></thead><tbody>{filtered.map(u=><tr key={u.id} className="border-b border-bone/[0.04]"><td className="py-2.5 pr-4 text-bone">{u.name??'—'}</td><td className="py-2.5 pr-4 text-ash">{u.email}</td><td className="py-2.5 pr-4 text-ash">{u.country??'—'}</td><td className="py-2.5 pr-4 text-ash">{u.collection_count}</td><td className="py-2.5 pr-4 text-ash">{u.review_count}</td><td className="py-2.5 text-xs text-ash">{new Date(u.created_at).toLocaleDateString()}</td></tr>)}</tbody></table>}</div></div>;
+  return<div className="space-y-4"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" className="input max-w-sm"/><div className="glass rounded-2xl p-4">
+    {loading?<div className="h-48 animate-pulse rounded-xl bg-obsidian2"/>:<>
+    <div className="hidden overflow-x-auto sm:block"><table className="w-full text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Name','Email','Country','Collection','Reviews','Joined'].map(h=><th key={h} className="pb-3 pr-4 text-left font-mono text-2xs uppercase text-ash">{h}</th>)}</tr></thead><tbody>{filtered.map(u=><tr key={u.id} className="border-b border-bone/[0.04]"><td className="py-2.5 pr-4 text-bone">{u.name??'—'}</td><td className="py-2.5 pr-4 text-ash">{u.email}</td><td className="py-2.5 pr-4 text-ash">{u.country??'—'}</td><td className="py-2.5 pr-4 text-ash">{u.collection_count}</td><td className="py-2.5 pr-4 text-ash">{u.review_count}</td><td className="py-2.5 text-xs text-ash">{new Date(u.created_at).toLocaleDateString()}</td></tr>)}</tbody></table></div>
+    <div className="space-y-2.5 sm:hidden">{filtered.map(u=>(
+      <div key={u.id} className="rounded-xl border border-bone/[0.06] bg-obsidian2 p-3.5">
+        <p className="truncate text-bone">{u.name??'—'}</p>
+        <p className="mt-0.5 truncate text-xs text-ash">{u.email}</p>
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-2xs text-ash">
+          {u.country&&<span>{u.country}</span>}
+          <span>{u.collection_count} in collection</span>
+          <span>{u.review_count} reviews</span>
+          <span className="text-ash/60">Joined {new Date(u.created_at).toLocaleDateString()}</span>
+        </div>
+      </div>
+    ))}</div>
+    </>}
+  </div></div>;
 }
 function PartialListings({secret}:{secret:string}){
   const[listings,setListings]=useState<any[]>([]);const[loading,setLoading]=useState(true);
@@ -104,7 +146,19 @@ function PartialListings({secret}:{secret:string}){
   useEffect(refresh,[secret]);
   if(loading)return<div className="h-48 animate-pulse rounded-2xl bg-obsidian2"/>;
   if(!listings.length)return<p className="text-ash">No listings yet.</p>;
-  return<div className="glass rounded-2xl p-4 overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Bottle','Seller','Price','Inq','Rep','Status',''].map(h=><th key={h} className="pb-3 pr-4 text-left font-mono text-2xs uppercase text-ash">{h}</th>)}</tr></thead><tbody>{listings.map(l=><tr key={l.id} className="border-b border-bone/[0.04]"><td className="py-2.5 pr-4 text-bone">{l.perfume_name}</td><td className="py-2.5 pr-4 text-ash">{(l.profiles as any)?.email??'—'}</td><td className="py-2.5 pr-4 font-mono text-gold">{l.currency} {Number(l.price).toFixed(0)}</td><td className="py-2.5 pr-4 text-electric">{l.inquiry_count}</td><td className={`py-2.5 pr-4 ${l.report_count>0?'text-ember font-bold':'text-ash'}`}>{l.report_count}</td><td className={`py-2.5 pr-4 font-mono text-2xs ${l.status==='active'?'text-electric':'text-ember'}`}>{l.status}</td><td className="py-2.5 text-right">{l.status==='active'?<button onClick={()=>af(`/api/admin/partial-listings/${l.id}`,secret,{method:'PATCH',body:JSON.stringify({status:'removed'})}).then(refresh)} className="text-xs text-ember">Remove</button>:<button onClick={()=>af(`/api/admin/partial-listings/${l.id}`,secret,{method:'PATCH',body:JSON.stringify({status:'active'})}).then(refresh)} className="text-xs text-electric">Restore</button>}</td></tr>)}</tbody></table></div>;
+  return<div className="glass rounded-2xl p-4">
+    <div className="hidden overflow-x-auto sm:block"><table className="w-full text-sm"><thead><tr className="border-b border-bone/[0.07]">{['Bottle','Seller','Price','Inq','Rep','Status',''].map(h=><th key={h} className="pb-3 pr-4 text-left font-mono text-2xs uppercase text-ash">{h}</th>)}</tr></thead><tbody>{listings.map(l=><tr key={l.id} className="border-b border-bone/[0.04]"><td className="py-2.5 pr-4 text-bone">{l.perfume_name}</td><td className="py-2.5 pr-4 text-ash">{(l.profiles as any)?.email??'—'}</td><td className="py-2.5 pr-4 font-mono text-gold">{l.currency} {Number(l.price).toFixed(0)}</td><td className="py-2.5 pr-4 text-electric">{l.inquiry_count}</td><td className={`py-2.5 pr-4 ${l.report_count>0?'text-ember font-bold':'text-ash'}`}>{l.report_count}</td><td className={`py-2.5 pr-4 font-mono text-2xs ${l.status==='active'?'text-electric':'text-ember'}`}>{l.status}</td><td className="py-2.5 text-right">{l.status==='active'?<button onClick={()=>af(`/api/admin/partial-listings/${l.id}`,secret,{method:'PATCH',body:JSON.stringify({status:'removed'})}).then(refresh)} className="text-xs text-ember">Remove</button>:<button onClick={()=>af(`/api/admin/partial-listings/${l.id}`,secret,{method:'PATCH',body:JSON.stringify({status:'active'})}).then(refresh)} className="text-xs text-electric">Restore</button>}</td></tr>)}</tbody></table></div>
+    <div className="space-y-2.5 sm:hidden">{listings.map(l=>(
+      <div key={l.id} className="rounded-xl border border-bone/[0.06] bg-obsidian2 p-3.5">
+        <div className="flex items-start justify-between gap-3"><p className="min-w-0 truncate text-bone">{l.perfume_name}</p><p className="shrink-0 font-mono text-gold">{l.currency} {Number(l.price).toFixed(0)}</p></div>
+        <p className="mt-0.5 truncate text-xs text-ash">{(l.profiles as any)?.email??'—'}</p>
+        <div className="mt-2.5 flex items-center justify-between border-t border-bone/[0.06] pt-2.5">
+          <div className="flex items-center gap-3 font-mono text-2xs"><span className="text-electric">{l.inquiry_count} inq</span><span className={l.report_count>0?'font-bold text-ember':'text-ash'}>{l.report_count} rep</span><span className={l.status==='active'?'text-electric':'text-ember'}>{l.status}</span></div>
+          {l.status==='active'?<button onClick={()=>af(`/api/admin/partial-listings/${l.id}`,secret,{method:'PATCH',body:JSON.stringify({status:'removed'})}).then(refresh)} className="text-xs text-ember">Remove</button>:<button onClick={()=>af(`/api/admin/partial-listings/${l.id}`,secret,{method:'PATCH',body:JSON.stringify({status:'active'})}).then(refresh)} className="text-xs text-electric">Restore</button>}
+        </div>
+      </div>
+    ))}</div>
+  </div>;
 }
 function Reports({secret}:{secret:string}){
   const confirmDialog=useConfirm();const promptDialog=usePrompt();const{toast}=useToast();

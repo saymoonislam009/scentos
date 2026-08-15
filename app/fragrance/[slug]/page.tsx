@@ -134,7 +134,7 @@ export default function FragrancePage({ params }: { params: { slug: string } }) 
           )}
           {f.description && <p className="mt-5 max-w-xl leading-relaxed text-ash">{f.description}</p>}
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-3">
+        <div className="flex shrink-0 flex-col items-start gap-3 sm:items-end">
           {user ? (
             inCol ? (
               <div className="flex items-center gap-3">
@@ -154,7 +154,7 @@ export default function FragrancePage({ params }: { params: { slug: string } }) 
               </div>
             )
           ) : <Link href="/sign-in" className="btn-ghost text-sm"><Heart size={14} />Sign in to collect</Link>}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {deals.length > 0 && <a href={deals[0].url} target="_blank" rel="noreferrer" className="btn-ghost text-xs"><ShoppingBag size={12} />From ${Number(deals[0].price).toFixed(2)} at {deals[0].retailer}<ExternalLink size={10} /></a>}
             <PriceAlertButton fragranceId={f.id} currentPrice={deals[0]?.price ?? f.price_tier_usd} />
           </div>
