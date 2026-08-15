@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client';
 import { FragranceAutocomplete } from '@/components/FragranceAutocomplete';
 import { AccordBars } from '@/components/fragrance/AccordBars';
 import { PerfStat } from '@/components/fragrance/FragranceBadges';
+import { AmbientGlow } from '@/components/BottleHero';
 
 type Side = { fragrance: any; dna: any; notes: any[]; accords: any[] } | null;
 
@@ -81,11 +82,12 @@ export default function ComparePage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-      <p className="section-label mb-3">Head to Head</p>
-      <h1 className="font-display text-4xl text-bone sm:text-5xl">Compare fragrances.</h1>
-      <p className="mt-3 text-sm text-ash">Pick two fragrances to compare notes, accords, and performance side by side.</p>
-      <div className="mt-10 grid gap-6 sm:grid-cols-2">
+    <div className="relative mx-auto max-w-6xl overflow-hidden px-4 py-16 sm:px-6">
+      <AmbientGlow className="left-1/2 top-0 h-96 w-96 -translate-x-1/2 opacity-60" />
+      <p className="section-label relative mb-3">Head to Head</p>
+      <h1 className="relative font-display text-4xl text-bone sm:text-5xl">Compare fragrances.</h1>
+      <p className="relative mt-3 text-sm text-ash">Pick two fragrances to compare notes, accords, and performance side by side.</p>
+      <div className="relative mt-10 grid gap-6 sm:grid-cols-2">
         <div>
           <p className="mb-2 font-mono text-2xs uppercase tracking-wider text-ash">Fragrance A</p>
           <FragranceAutocomplete placeholder="Search first fragrance…" onSelect={selectLeft} />

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { api } from '@/lib/api';
+import { AmbientGlow } from '@/components/BottleHero';
 type F = { age:string; gender:string; budgetUsd:string; country:string; climate:string; favoriteFragrances:string; favoriteNotes:string; performance:string };
 const STEPS = ['About you','Where you are','Your taste','Performance'] as const;
 const CLIMATES = [{v:'hot-humid',l:'Hot & humid'},{v:'hot-dry',l:'Hot & dry'},{v:'temperate',l:'Temperate'},{v:'cold',l:'Cold'}];
@@ -19,10 +20,11 @@ export default function AdvisorPage() {
     finally { setLoading(false); }
   }
   if (result) return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-      <p className="section-label mb-3">Your matches</p>
-      <h1 className="font-display text-4xl text-bone">Here&rsquo;s what fits.</h1>
-      <div className="mt-8 space-y-4">
+    <div className="relative mx-auto max-w-3xl overflow-hidden px-4 py-16 sm:px-6">
+      <AmbientGlow className="left-1/2 top-0 h-80 w-80 -translate-x-1/2 opacity-50" />
+      <p className="section-label relative mb-3">Your matches</p>
+      <h1 className="relative font-display text-4xl text-bone">Here&rsquo;s what fits.</h1>
+      <div className="relative mt-8 space-y-4">
         {result.matches?.map((m: any, i: number) => (
           <div key={m.fragranceId} className="glass rounded-2xl p-6">
             <div className="flex items-start justify-between gap-4">
@@ -44,9 +46,10 @@ export default function AdvisorPage() {
     </div>
   );
   return (
-    <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
-      <p className="section-label mb-3">AI Fragrance Advisor</p>
-      <h1 className="font-display text-4xl text-bone sm:text-5xl">Find your scent.</h1>
+    <div className="relative mx-auto max-w-2xl overflow-hidden px-4 py-16 sm:px-6">
+      <AmbientGlow className="left-1/2 top-0 h-80 w-80 -translate-x-1/2 opacity-70" />
+      <p className="section-label relative mb-3">AI Fragrance Advisor</p>
+      <h1 className="relative font-display text-4xl text-bone sm:text-5xl">Find your scent.</h1>
       <p className="mt-3 text-sm text-ash">Claude reads your preferences and recommends from a real catalog — never a hallucinated name.</p>
       <div className="mt-8 flex gap-2">{STEPS.map((s,i) => <div key={s} className={`h-0.5 flex-1 rounded-full transition-colors duration-500 ${i<=step?'bg-gold':'bg-bone/10'}`}/>)}</div>
       <p className="mt-2 font-mono text-2xs text-ash">{step+1} / {STEPS.length} — {STEPS[step]}</p>

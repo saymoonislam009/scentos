@@ -10,6 +10,7 @@ import { NotePyramid } from '@/components/fragrance/NotePyramid';
 import { SeasonBadges, OccasionBadges, PerfStat } from '@/components/fragrance/FragranceBadges';
 import { PriceAlertButton } from '@/components/PriceAlertButton';
 import { useToast } from '@/components/Toast';
+import { scentColor } from '@/lib/scentColor';
 
 const PROJ: Record<string,string> = { intimate:'Intimate', moderate:'Moderate', strong:'Strong', 'beast-mode':'Beast mode' };
 
@@ -112,12 +113,20 @@ export default function FragrancePage({ params }: { params: { slug: string } }) 
   const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : null;
   const accordList = accords.map((a: any) => ({ name: (a.accords as any)?.name, strength: a.strength })).filter((a: any) => a.name);
 
+  const accent = scentColor(dna);
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-      <Link href="/database" className="mb-6 inline-block font-mono text-2xs text-ash hover:text-bone">← Database</Link>
-      <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+    <div className="relative mx-auto max-w-5xl px-4 py-12 sm:px-6">
+      {accent && (
+        <div className="pointer-events-none absolute -top-8 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full opacity-[0.16] blur-[90px] sm:h-96 sm:w-96" style={{ background: accent }} aria-hidden="true" />
+      )}
+      <Link href="/database" className="relative mb-6 inline-block font-mono text-2xs text-ash hover:text-bone">← Database</Link>
+      <div className="relative flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex-1 min-w-0">
-          <p className="section-label mb-2">{brand?.name}</p>
+          <div className="mb-2 flex items-center gap-2.5">
+            {accent && <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: accent, boxShadow: `0 0 10px ${accent}` }} />}
+            <p className="section-label">{brand?.name}</p>
+          </div>
           <h1 className="font-display text-4xl leading-tight text-bone sm:text-6xl">{f.name}</h1>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {f.concentration && <span className="badge border border-bone/15 text-ash">{f.concentration}</span>}

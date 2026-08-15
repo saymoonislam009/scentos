@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { scentColor } from '@/lib/scentColor';
+import { AmbientGlow } from '@/components/BottleHero';
 const SEASONS = ['spring','summer','fall','winter'];
 const OCCASIONS = ['office','date-night','casual','formal'];
 export default function DatabasePage() {
@@ -32,10 +34,11 @@ export default function DatabasePage() {
     return () => { active = false; };
   }, [query, season, occasion]);
   return (
-    <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-      <p className="section-label mb-3">Fragrance Database</p>
-      <h1 className="font-display text-4xl text-bone sm:text-5xl mb-8">Explore the catalog.</h1>
-      <div className="glass rounded-2xl p-4 sm:p-5 mb-6">
+    <div className="relative mx-auto max-w-7xl overflow-hidden px-4 py-16 sm:px-6">
+      <AmbientGlow className="left-1/2 top-0 h-96 w-96 -translate-x-1/2 opacity-60" />
+      <p className="section-label relative mb-3">Fragrance Database</p>
+      <h1 className="relative font-display text-4xl text-bone sm:text-5xl mb-8">Explore the catalog.</h1>
+      <div className="glass relative rounded-2xl p-4 sm:p-5 mb-6">
         <div className="relative mb-4"><Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ash" /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search by name or brand…" className="input pl-10" /></div>
         <div className="flex flex-wrap gap-4">
           <div><p className="mb-2 font-mono text-2xs uppercase tracking-wider text-ash">Season</p><div className="flex flex-wrap gap-1.5">{SEASONS.map(s => <button key={s} onClick={() => setSeason(season === s ? '' : s)} className={`badge !py-2 border capitalize transition-colors ${season === s ? 'border-gold/50 bg-gold/15 text-gold' : 'border-bone/10 text-ash hover:border-bone/20'}`}>{s}</button>)}</div></div>
@@ -45,7 +48,8 @@ export default function DatabasePage() {
       <p className="mb-4 font-mono text-2xs text-ash">{loading ? 'Searching…' : `${items.length} results`}</p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {loading ? [...Array(8)].map((_, i) => <div key={i} className="h-48 animate-pulse rounded-2xl bg-obsidian2" />) : items.map(f => (
-          <Link key={f.id} href={`/fragrance/${f.slug}`} className="card flex flex-col p-5">
+          <Link key={f.id} href={`/fragrance/${f.slug}`} className="card relative flex flex-col overflow-hidden p-5">
+            <span className="absolute inset-x-0 top-0 h-[3px]" style={{ background: scentColor(f.dna) ?? 'rgba(237,232,223,0.08)' }} />
             <p className="section-label text-2xs">{f.brand?.name}</p>
             <h3 className="mt-2 font-display text-xl text-bone leading-snug">{f.name}</h3>
             {f.concentration && <span className="mt-2 inline-block self-start badge border border-bone/10 text-ash">{f.concentration}</span>}

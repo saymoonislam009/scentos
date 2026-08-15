@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { AmbientGlow } from '@/components/BottleHero';
 
 const QUESTIONS = [
   { id: 'occasion', q: 'When do you wear fragrance most?', options: [{ v:'office',l:'Office & daily' },{ v:'date-night',l:'Evenings & dates' },{ v:'casual',l:'Weekends & casual' },{ v:'formal',l:'Special occasions' }] },
@@ -42,14 +43,15 @@ export default function QuizPage() {
   }
 
   if (result) return (
-    <div className="mx-auto max-w-2xl px-4 py-24 sm:px-6 text-center">
-      <p className="section-label mb-4">Your scent profile</p>
-      <h1 className="font-display text-5xl text-bone">{result.title}</h1>
-      <div className="mt-6 flex flex-wrap justify-center gap-2">
+    <div className="relative mx-auto max-w-2xl overflow-hidden px-4 py-24 sm:px-6 text-center">
+      <AmbientGlow className="left-1/2 top-0 h-96 w-96 -translate-x-1/2" />
+      <p className="section-label relative mb-4">Your scent profile</p>
+      <h1 className="relative font-display text-5xl text-bone">{result.title}</h1>
+      <div className="relative mt-6 flex flex-wrap justify-center gap-2">
         {result.tags.map(t => <span key={t} className="badge border border-gold/30 bg-gold/10 text-gold">{t}</span>)}
       </div>
-      <p className="mx-auto mt-8 max-w-md leading-relaxed text-ash">{result.desc}</p>
-      <div className="mt-10 flex flex-wrap justify-center gap-4">
+      <p className="relative mx-auto mt-8 max-w-md leading-relaxed text-ash">{result.desc}</p>
+      <div className="relative mt-10 flex flex-wrap justify-center gap-4">
         <Link href="/advisor" className="btn-gold">Get AI Recommendations →</Link>
         <Link href="/database" className="btn-ghost">Browse Catalog</Link>
       </div>

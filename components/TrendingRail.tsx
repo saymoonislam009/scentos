@@ -3,12 +3,21 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { TrendingUp } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { scentColor } from '@/lib/scentColor';
 
 export function TrendingRail() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    createClient().rpc('trending_fragrances', { p_days: 30, p_limit: 6 }).then(({ data }) => { setItems(data ?? []); setLoading(false); });
+    const s = createClient();
+    s.rpc('trending_fragrances', { p_days: 30, p_limit: 6 }).then(async ({ data }) => {
+      const rows = data ?? [];
+      const ids = rows.map((r: any) => r.fragrance_id);
+      const { data: dna } = ids.length ? await s.from('dna_scores').select('fragrance_id,sweetness,freshness').in('fragrance_id', ids) : { data: [] as any[] };
+      const dMap = new Map((dna ?? []).map((d: any) => [d.fragrance_id, d]));
+      setItems(rows.map((r: any) => ({ ...r, dna: dMap.get(r.fragrance_id) })));
+      setLoading(false);
+    });
   }, []);
   if (!loading && items.length === 0) return null;
   return (
@@ -22,7 +31,8 @@ export function TrendingRail() {
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
           {items.map((g: any, i: number) => (
-            <Link key={g.fragrance_id} href={`/fragrance/${g.slug}`} className="card shrink-0 w-56 p-4">
+            <Link key={g.fragrance_id} href={`/fragrance/${g.slug}`} className="card relative w-56 shrink-0 overflow-hidden p-4">
+              <span className="absolute inset-x-0 top-0 h-[3px]" style={{ background: scentColor(g.dna) ?? 'rgba(237,232,223,0.08)' }} />
               <div className="flex items-center justify-between">
                 <span className="font-display text-lg text-gold/50">#{i + 1}</span>
                 <span className="font-mono text-2xs text-electric">{String(g.signal_count)} signals</span>

@@ -1,19 +1,20 @@
 import Link from 'next/link';
+import { Sparkles, Search, Package, MessageSquare, Layers, ShoppingBag } from 'lucide-react';
 import { RecentlyViewedRail } from '@/components/RecentlyViewedRail';
 import { TrendingRail } from '@/components/TrendingRail';
 import { AmbientGlow } from '@/components/BottleHero';
-import { BottleMark } from '@/components/BottleMark';
+import { ScentMark } from '@/components/ScentMark';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const revalidate = 300; // refresh live stats every 5 minutes instead of freezing them at build/first-request time
 
 const PILLARS = [
-  { num: '01', title: 'AI Fragrance Advisor', body: 'Claude reads your taste like a perfumer would — recommends from a real catalog, never a hallucinated name.', href: '/advisor' },
-  { num: '02', title: 'Fragrance Database', body: 'The full catalog with DNA scoring, note pyramids, accord bars, and Genome similarity matching.', href: '/database' },
-  { num: '03', title: 'Used Bottle Market', body: 'Casual classifieds for partial bottles. Message sellers directly in-app — sharing a phone number is always optional.', href: '/partial-bottles' },
-  { num: '04', title: 'ScentGPT', body: 'A chat expert that looks up real notes and prices before it answers. Ask it anything.', href: '/scentgpt' },
-  { num: '05', title: 'Collection & Layering', body: 'Track every bottle and decant, then get AI-composed layering combinations from what you already own.', href: '/collection' },
-  { num: '06', title: 'Decant Marketplace', body: 'Escrow-protected trading. Funds held until delivery is confirmed, released automatically 72 hours later.', href: '/marketplace' },
+  { num: '01', icon: Sparkles, title: 'AI Fragrance Advisor', body: 'Claude reads your taste like a perfumer would — recommends from a real catalog, never a hallucinated name.', href: '/advisor' },
+  { num: '02', icon: Search, title: 'Fragrance Database', body: 'The full catalog with DNA scoring, note pyramids, accord bars, and Genome similarity matching.', href: '/database' },
+  { num: '03', icon: Package, title: 'Used Bottle Market', body: 'Casual classifieds for partial bottles. Message sellers directly in-app — sharing a phone number is always optional.', href: '/partial-bottles' },
+  { num: '04', icon: MessageSquare, title: 'ScentGPT', body: 'A chat expert that looks up real notes and prices before it answers. Ask it anything.', href: '/scentgpt' },
+  { num: '05', icon: Layers, title: 'Collection & Layering', body: 'Track every bottle and decant, then get AI-composed layering combinations from what you already own.', href: '/collection' },
+  { num: '06', icon: ShoppingBag, title: 'Decant Marketplace', body: 'Escrow-protected trading. Funds held until delivery is confirmed, released automatically 72 hours later.', href: '/marketplace' },
 ] as const;
 
 async function getLiveStats() {
@@ -41,11 +42,12 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden px-4 pb-16 pt-20 sm:px-6 lg:pb-20 lg:pt-28">
+      <section className="relative overflow-hidden px-4 pb-16 pt-16 sm:px-6 lg:pb-20 lg:pt-24">
         <AmbientGlow className="left-1/2 top-0 h-[36rem] w-[36rem] -translate-x-1/2" />
         <div className="mx-auto max-w-2xl text-center">
-          <div className="animate-fade-up mb-8 flex items-center justify-center gap-3">
-            <BottleMark className="h-5 w-5 text-gold/70" />
+          <div className="animate-fade-up relative mx-auto mb-5 h-16 w-16 sm:h-20 sm:w-20">
+            <div className="absolute inset-0 rounded-full bg-gold/10 blur-2xl" />
+            <ScentMark className="relative h-full w-full text-gold/60" />
           </div>
           <p className="section-label animate-fade-up mb-6">The Fragrance Operating System</p>
           <h1 className="animate-fade-up font-display text-4xl leading-[1.08] text-bone sm:text-6xl lg:text-7xl" style={{ animationDelay: '0.1s' }}>
@@ -111,13 +113,18 @@ export default async function HomePage() {
 
           <div className="mt-16 divide-y divide-bone/[0.06]">
             {PILLARS.map(p => (
-              <Link key={p.num} href={p.href} className="group flex items-start gap-6 py-8 transition-colors sm:gap-10">
-                <span className="font-display text-2xl text-gold/35 transition-colors duration-300 group-hover:text-gold sm:text-3xl">{p.num}</span>
-                <div className="flex-1">
+              <Link key={p.num} href={p.href} className="group flex items-center gap-5 py-7 transition-colors sm:gap-8 sm:py-8">
+                <div className="flex shrink-0 flex-col items-center gap-2">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/15 bg-gold/[0.03] text-gold/50 transition-all duration-300 group-hover:border-gold/45 group-hover:bg-gold/10 group-hover:text-gold sm:h-12 sm:w-12">
+                    <p.icon size={18} strokeWidth={1.6} />
+                  </span>
+                  <span className="font-mono text-2xs text-ash/40 transition-colors duration-300 group-hover:text-gold/70">{p.num}</span>
+                </div>
+                <div className="min-w-0 flex-1">
                   <h3 className="font-display text-xl text-bone sm:text-2xl">{p.title}</h3>
                   <p className="mt-2 max-w-lg text-sm leading-relaxed text-ash sm:text-base">{p.body}</p>
                 </div>
-                <span className="mt-2 shrink-0 font-mono text-xs text-ash/40 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:text-gold group-hover:opacity-100">→</span>
+                <span className="shrink-0 font-mono text-xs text-ash/40 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:text-gold group-hover:opacity-100">→</span>
               </Link>
             ))}
           </div>
@@ -126,8 +133,9 @@ export default async function HomePage() {
 
       <div className="divider-gold mx-auto max-w-4xl" />
 
-      <section className="px-4 py-28 sm:px-6">
-        <div className="mx-auto max-w-2xl text-center">
+      <section className="relative overflow-hidden px-4 py-28 sm:px-6">
+        <AmbientGlow className="left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 opacity-60" />
+        <div className="relative mx-auto max-w-2xl text-center">
           <p className="section-label mb-4">Your number stays yours</p>
           <h2 className="font-display text-3xl text-bone sm:text-4xl">Selling a partial bottle?</h2>
           <p className="mx-auto mt-4 max-w-md text-ash">List your perfume name, days used, percent remaining, and payment preference. Buyers message you in-app — sharing a phone number is entirely optional.</p>

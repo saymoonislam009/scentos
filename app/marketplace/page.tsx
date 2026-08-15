@@ -6,6 +6,7 @@ import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
 import { FragranceAutocomplete } from '@/components/FragranceAutocomplete';
 import { useConfirm, usePrompt } from '@/components/ui/ConfirmProvider';
+import { AmbientGlow } from '@/components/BottleHero';
 export default function MarketplacePage() {
   const { user } = useUser();
   const confirmDialog = useConfirm();
@@ -40,12 +41,13 @@ export default function MarketplacePage() {
   async function confirmDelivered(id: string) { await createClient().rpc('confirm_order_delivered', { p_order_id: id }); refreshOrders(); setNotice('Confirmed. Funds release in 72h.'); }
   async function dispute(id: string) { const ok = await confirmDialog({ title: 'Open a dispute', message: 'This flags the order for review. Only do this if something went wrong with the transaction.', confirmLabel: 'Open dispute', danger: true }); if (!ok) return; await createClient().rpc('dispute_order', { p_order_id: id }); refreshOrders(); }
   return (
-    <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
-      <div className="flex flex-wrap items-start justify-between gap-6">
+    <div className="relative mx-auto max-w-5xl overflow-hidden px-4 py-16 sm:px-6">
+      <AmbientGlow className="left-1/2 top-0 h-96 w-96 -translate-x-1/2 opacity-60" />
+      <div className="relative flex flex-wrap items-start justify-between gap-6">
         <div><p className="section-label mb-3">Decant Marketplace</p><h1 className="font-display text-4xl text-bone sm:text-5xl">Buy, sell, trade.</h1></div>
         {user && <button onClick={() => setShowForm(s => !s)} className="btn-gold shrink-0">{showForm ? 'Cancel' : 'List a decant'}</button>}
       </div>
-      <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+      <div className="relative mt-6 grid grid-cols-3 gap-2 sm:gap-3">
         {[{I:ShieldCheck,l:'Escrow protected'},{I:Clock,l:'72h auto-release'},{I:Package,l:'Dispute support'}].map(({I,l}) => (
           <div key={l} className="glass rounded-xl p-2.5 text-center sm:p-3"><I size={16} className="mx-auto text-gold" /><p className="mt-1.5 font-mono text-[0.6rem] leading-tight text-ash sm:text-2xs">{l}</p></div>
         ))}
