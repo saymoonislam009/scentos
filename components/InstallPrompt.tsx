@@ -29,7 +29,7 @@ export function InstallPrompt() {
   if (!show || dismissed) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-[90] sm:left-auto sm:right-4 sm:w-80">
+    <div className="fixed-bottom-safe fixed bottom-4 left-4 right-4 z-[90] sm:left-auto sm:right-4 sm:w-80">
       <div className="glass flex items-start gap-3 rounded-2xl border border-gold/20 p-4 shadow-glass animate-fade-up">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold"><Download size={16} /></div>
         <div className="flex-1">

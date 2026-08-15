@@ -40,7 +40,7 @@ export default function CollectionPage() {
           )}
           <div className="mt-8 flex flex-wrap gap-2">
             {['all','bottle','decant','wishlist','empty'].map(t => (
-              <button key={t} onClick={() => setFilter(t)} className={`badge border capitalize transition-colors ${filter === t ? 'border-gold/50 bg-gold/15 text-gold' : 'border-bone/10 text-ash hover:border-bone/20'}`}>
+              <button key={t} onClick={() => setFilter(t)} className={`badge !py-2 border capitalize transition-colors ${filter === t ? 'border-gold/50 bg-gold/15 text-gold' : 'border-bone/10 text-ash hover:border-bone/20'}`}>
                 {t}{t !== 'all' && ` (${items.filter(i => i.type === t).length})`}
               </button>
             ))}

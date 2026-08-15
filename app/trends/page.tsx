@@ -29,7 +29,7 @@ export default function TrendsPage() {
       <section className="mt-12">
         <div className="flex flex-wrap items-center gap-4">
           <h2 className="font-display text-2xl text-bone">By season</h2>
-          <div className="flex gap-2">{SEASONS.map(s => <button key={s} onClick={() => setSeason(s)} className={`badge border capitalize transition-colors ${season === s ? 'border-gold/50 bg-gold/15 text-gold' : 'border-bone/10 text-ash hover:border-bone/20'}`}>{s}</button>)}</div>
+          <div className="flex gap-2">{SEASONS.map(s => <button key={s} onClick={() => setSeason(s)} className={`badge !py-2 border capitalize transition-colors ${season === s ? 'border-gold/50 bg-gold/15 text-gold' : 'border-bone/10 text-ash hover:border-bone/20'}`}>{s}</button>)}</div>
         </div>
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {bySeason.map((f: any) => <Link key={f.id} href={`/fragrance/${f.slug}`} className="card p-5"><p className="section-label text-2xs">{(f.brands as any)?.name}</p><h3 className="mt-2 font-display text-xl text-bone">{f.name}</h3></Link>)}

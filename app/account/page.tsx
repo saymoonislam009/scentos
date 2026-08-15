@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { User, Package, Heart, ShoppingBag, Bell, X } from 'lucide-react';
+import { User, Package, Heart, ShoppingBag, Bell, X, Lock } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 import { createClient } from '@/lib/supabase/client';
 import { signOut } from '@/app/auth/actions';
@@ -18,6 +18,11 @@ export default function AccountPage() {
   const [alerts, setAlerts] = useState<any[]>([]);
   const [editName, setEditName] = useState(false);
   const [nameInput, setNameInput] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -45,6 +50,18 @@ export default function AccountPage() {
     await createClient().from('profiles').update({ name: nameInput }).eq('id', user.id);
     setProfile((p: any) => ({ ...p, name: nameInput }));
     setEditName(false); setSaving(false);
+  }
+
+  async function changePassword() {
+    setPasswordError('');
+    if (newPassword.length < 8) { setPasswordError('Password must be at least 8 characters.'); return; }
+    if (newPassword !== confirmPassword) { setPasswordError("Passwords don't match."); return; }
+    setSavingPassword(true);
+    const { error } = await createClient().auth.updateUser({ password: newPassword });
+    setSavingPassword(false);
+    if (error) { setPasswordError(error.message); return; }
+    setChangingPassword(false); setNewPassword(''); setConfirmPassword('');
+    toast('Password updated.', 'success');
   }
 
   if (ul) return <div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" /></div>;
@@ -96,6 +113,27 @@ export default function AccountPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="glass mt-4 rounded-2xl p-6 sm:p-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-bone/5 text-ash"><Lock size={15} /></div>
+            <p className="text-sm font-medium text-bone">Password</p>
+          </div>
+          {!changingPassword && <button onClick={() => setChangingPassword(true)} className="font-mono text-2xs text-electric hover:underline">Change</button>}
+        </div>
+        {changingPassword && (
+          <div className="mt-4 space-y-3 border-t border-bone/[0.06] pt-4">
+            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 8 characters)" autoComplete="new-password" className="input" />
+            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm new password" autoComplete="new-password" className="input" />
+            {passwordError && <p className="text-sm text-ember">{passwordError}</p>}
+            <div className="flex gap-2">
+              <button onClick={changePassword} disabled={savingPassword} className="btn-gold !py-2 text-sm disabled:opacity-50">{savingPassword ? 'Updating…' : 'Update password'}</button>
+              <button onClick={() => { setChangingPassword(false); setNewPassword(''); setConfirmPassword(''); setPasswordError(''); }} className="text-sm text-ash">Cancel</button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">

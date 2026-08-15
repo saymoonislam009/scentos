@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   icons: { icon: [{ url: '/icons/favicon.png', sizes: '64x64', type: 'image/png' }, { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }], apple: [{ url: '/icons/apple-touch-icon.png' }] },
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'ScentOS' },
 };
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, maximumScale: 1, themeColor: '#080806', viewportFit: 'cover' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#080806', viewportFit: 'cover' };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable} ${jetbrains.variable}`}>

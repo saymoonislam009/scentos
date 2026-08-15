@@ -43,7 +43,7 @@ export default function ScentGptPage() {
         </div>
         <div ref={endRef} />
       </div>
-      <div className="border-t border-bone/[0.06] py-4">
+      <div className="pb-safe border-t border-bone/[0.06] py-4">
         <div className="flex gap-3 items-end">
           <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }} placeholder="Ask ScentGPT… (Enter to send)" rows={1} className="input flex-1 resize-none" />
           <button onClick={() => send(input)} disabled={loading || !input.trim()} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold text-matte transition-opacity disabled:opacity-40"><Send size={16} /></button>

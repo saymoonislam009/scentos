@@ -10,6 +10,7 @@ export default function SignInPage({searchParams}:{searchParams:{error?:string;c
           {searchParams.error&&<div className="rounded-xl bg-ember/10 border border-ember/20 p-3 text-sm text-ember">{searchParams.error}</div>}
           <div><label className="mb-1.5 block font-mono text-2xs uppercase tracking-wider text-ash">Email</label><input name="email" type="email" required autoComplete="email" className="input" placeholder="you@example.com"/></div>
           <div><label className="mb-1.5 block font-mono text-2xs uppercase tracking-wider text-ash">Password</label><input name="password" type="password" required autoComplete="current-password" className="input" placeholder="••••••••"/></div>
+          <div className="text-right"><Link href="/forgot-password" className="font-mono text-2xs text-ash hover:text-gold">Forgot password?</Link></div>
           <button type="submit" className="btn-gold w-full justify-center mt-2">Sign in</button>
         </form>
         <p className="mt-5 text-center text-sm text-ash">No account? <Link href="/sign-up" className="text-gold hover:text-gold-soft">Create one</Link></p>

@@ -130,7 +130,7 @@ export default function ConversationPage() {
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={send} className="flex gap-3 border-t border-bone/[0.06] py-4">
+      <form onSubmit={send} className="pb-safe flex gap-3 border-t border-bone/[0.06] py-4">
         <input value={input} onChange={e => setInput(e.target.value)} placeholder="Type a message…" className="input flex-1" maxLength={2000} />
         <button type="submit" disabled={sending || !input.trim()} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold text-matte transition-opacity disabled:opacity-40"><Send size={16} /></button>
       </form>

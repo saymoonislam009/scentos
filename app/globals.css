@@ -4,7 +4,8 @@
 
 @layer base {
   html { color-scheme: dark; scroll-behavior: smooth; }
-  body { background-color: #080806; color: #EDE8DF; min-height: 100vh; position: relative; }
+  body { background-color: #080806; color: #EDE8DF; min-height: 100vh; position: relative; -webkit-tap-highlight-color: transparent; }
+  * { -webkit-tap-highlight-color: transparent; }
   body::before {
     content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
     opacity: 0.045; mix-blend-mode: overlay;
@@ -46,9 +47,10 @@
     width: 100%; border-radius: 0.625rem;
     border: 1px solid rgba(237,232,223,0.10);
     background: rgba(237,232,223,0.03);
-    padding: 0.75rem 1rem; color: #EDE8DF; font-size: 0.875rem;
+    padding: 0.75rem 1rem; color: #EDE8DF; font-size: 1rem;
     transition: border-color 0.2s, background 0.2s; outline: none;
   }
+  @media (min-width: 640px) { .input { font-size: 0.875rem; } }
   .input:focus { border-color: rgba(201,162,75,0.5); background: rgba(237,232,223,0.05); }
   .input::placeholder { color: rgba(156,148,136,0.55); }
   .btn-gold {
@@ -101,6 +103,12 @@
   animation: shimmer 4s linear infinite;
 }
 .glow-gold { position:absolute; border-radius:50%; background:radial-gradient(circle, rgba(201,162,75,0.12) 0%, transparent 70%); pointer-events:none; }
+
+/* Safe-area padding for fixed elements, since viewport-fit:cover means the
+   page extends under the iPhone home-indicator bar and notch. */
+.pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.fixed-bottom-safe { bottom: max(1rem, env(safe-area-inset-bottom)) !important; }
 
 /* Ambient atmospheric light — abstract, restrained, no illustration.
    A slow, barely-perceptible breathing glow evoking light through liquid. */
