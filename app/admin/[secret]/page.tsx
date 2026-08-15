@@ -175,13 +175,54 @@ function Reports({secret}:{secret:string}){
   </div>;
 }
 function Import({secret}:{secret:string}){
-  const[mode,setMode]=useState<'csv'|'pdf'>('csv');
+  const[mode,setMode]=useState<'sync'|'csv'|'pdf'>('sync');
   return<div className="space-y-6">
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
+      <button onClick={()=>setMode('sync')} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${mode==='sync'?'bg-gold/15 text-gold border border-gold/30':'text-ash hover:text-bone border border-transparent'}`}>AI Sync (name only)</button>
       <button onClick={()=>setMode('csv')} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${mode==='csv'?'bg-gold/15 text-gold border border-gold/30':'text-ash hover:text-bone border border-transparent'}`}>CSV Import</button>
       <button onClick={()=>setMode('pdf')} className={`rounded-full px-4 py-1.5 text-sm transition-colors ${mode==='pdf'?'bg-gold/15 text-gold border border-gold/30':'text-ash hover:text-bone border border-transparent'}`}>PDF Import (AI)</button>
     </div>
-    {mode==='csv'?<CsvImport secret={secret}/>:<PdfImport secret={secret}/>}
+    {mode==='sync'?<AiSync secret={secret}/>:mode==='csv'?<CsvImport secret={secret}/>:<PdfImport secret={secret}/>}
+  </div>;
+}
+function AiSync({secret}:{secret:string}){
+  const{toast}=useToast();
+  const[name,setName]=useState('');const[brand,setBrand]=useState('');
+  const[syncing,setSyncing]=useState(false);const[error,setError]=useState('');
+  const[log,setLog]=useState<{name:string;brand?:string;status:'ok'|'error';detail:string}[]>([]);
+  async function sync(e:React.FormEvent){
+    e.preventDefault();
+    if(!name.trim())return;
+    setSyncing(true);setError('');
+    const n=name.trim();const b=brand.trim();
+    const r=await fetch('/api/admin/ai-sync',{method:'POST',headers:{'Content-Type':'application/json','x-admin-secret':secret},body:JSON.stringify({name:n,brand:b||undefined})}).then(x=>x.json()).catch(()=>null);
+    setSyncing(false);
+    if(!r||r.error){const msg=r?.error??'Sync failed';setError(msg);setLog(l=>[{name:n,brand:b||undefined,status:'error',detail:msg},...l]);return;}
+    setLog(l=>[{name:r.fragrance?.name??n,brand:r.fragrance?.brand,status:'ok',detail:`Added — ${(r.fragrance?.notes?.top?.length??0)+(r.fragrance?.notes?.mid?.length??0)+(r.fragrance?.notes?.base?.length??0)} notes, ${r.fragrance?.accords?.length??0} accords`},...l]);
+    toast(`${r.fragrance?.name} synced and added.`,'success');
+    setName('');setBrand('');
+  }
+  return<div className="space-y-6">
+    <div className="glass rounded-2xl p-6">
+      <h2 className="font-display text-xl text-bone">One-click AI Sync</h2>
+      <p className="mt-2 text-sm text-ash">Type just the perfume name — Claude fills in brand, concentration, description, notes, accords, performance stats, seasons, and occasions, and it's added straight to the catalog. No review step, so double-check the entry afterwards in the table below.</p>
+      <form onSubmit={sync} className="mt-5 flex flex-wrap items-end gap-3">
+        <label className="block flex-1 min-w-[12rem]"><span className="mb-1 block font-mono text-2xs uppercase tracking-wider text-ash">Perfume name *</span><input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Bleu de Chanel" className="input" required/></label>
+        <label className="block flex-1 min-w-[10rem]"><span className="mb-1 block font-mono text-2xs uppercase tracking-wider text-ash">Brand (optional, helps accuracy)</span><input value={brand} onChange={e=>setBrand(e.target.value)} placeholder="e.g. Chanel" className="input"/></label>
+        <button type="submit" disabled={syncing||!name.trim()} className="btn-gold shrink-0 disabled:opacity-50">{syncing?'Syncing…':'Sync with AI'}</button>
+      </form>
+      {error&&<p className="mt-3 text-sm text-ember">{error}</p>}
+    </div>
+    {log.length>0&&<div className="glass rounded-2xl p-4">
+      <p className="mb-3 font-mono text-2xs uppercase tracking-wider text-ash">Recent syncs</p>
+      <div className="space-y-2">{log.map((l,i)=>(
+        <div key={i} className={`rounded-xl border px-4 py-2.5 text-sm ${l.status==='ok'?'border-electric/25 bg-electric/[0.05]':'border-ember/25 bg-ember/[0.05]'}`}>
+          <span className={l.status==='ok'?'text-electric':'text-ember'}>{l.status==='ok'?'✓':'✕'}</span>{' '}
+          <span className="text-bone">{l.name}</span>{l.brand&&<span className="text-ash"> — {l.brand}</span>}
+          <span className="ml-2 text-xs text-ash">{l.detail}</span>
+        </div>
+      ))}</div>
+    </div>}
   </div>;
 }
 function CsvImport({secret}:{secret:string}){

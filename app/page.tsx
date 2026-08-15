@@ -5,6 +5,8 @@ import { AmbientGlow } from '@/components/BottleHero';
 import { BottleMark } from '@/components/BottleMark';
 import { createAdminClient } from '@/lib/supabase/admin';
 
+export const revalidate = 300; // refresh live stats every 5 minutes instead of freezing them at build/first-request time
+
 const PILLARS = [
   { num: '01', title: 'AI Fragrance Advisor', body: 'Claude reads your taste like a perfumer would — recommends from a real catalog, never a hallucinated name.', href: '/advisor' },
   { num: '02', title: 'Fragrance Database', body: 'The full catalog with DNA scoring, note pyramids, accord bars, and Genome similarity matching.', href: '/database' },

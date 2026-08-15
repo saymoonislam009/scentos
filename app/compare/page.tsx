@@ -7,19 +7,6 @@ import { PerfStat } from '@/components/fragrance/FragranceBadges';
 
 type Side = { fragrance: any; dna: any; notes: any[]; accords: any[] } | null;
 
-async function loadFragrance(slug: string): Promise<Side> {
-  const s = createClient();
-  const { data: f } = await s.from('fragrances').select('*').eq('slug', slug).single();
-  if (!f) return null;
-  const [{ data: br }, { data: d }, { data: n }, { data: a }] = await Promise.all([
-    s.from('brands').select('name').eq('id', f.brand_id).single(),
-    s.from('dna_scores').select('*').eq('fragrance_id', f.id).maybeSingle(),
-    s.from('fragrance_notes').select('position,notes(name)').eq('fragrance_id', f.id),
-    s.from('fragrance_accords').select('strength,accords(name)').eq('fragrance_id', f.id),
-  ]);
-  return { fragrance: { ...f, brand: br }, dna: d, notes: n ?? [], accords: (a ?? []).map((x: any) => ({ name: x.accords?.name, strength: x.strength })).filter((x: any) => x.name) };
-}
-
 function CompareCol({ side, label }: { side: Side; label: string }) {
   if (!side) return (
     <div className="glass flex h-48 items-center justify-center rounded-2xl">
@@ -75,26 +62,20 @@ function CompareCol({ side, label }: { side: Side; label: string }) {
 }
 
 export default function ComparePage() {
-  const [leftSlug, setLeftSlug] = useState('');
-  const [rightSlug, setRightSlug] = useState('');
   const [left, setLeft] = useState<Side>(null);
   const [right, setRight] = useState<Side>(null);
   const [loading, setLoading] = useState({ left: false, right: false });
 
-  async function selectLeft(id: string, name: string) {
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  async function selectLeft(id: string) {
     setLoading(l => ({ ...l, left: true }));
-    const data = await loadFragrance(id).catch(() => null);
-    if (!data) {
-      const s = await loadFragranceById(id);
-      setLeft(s);
-    } else { setLeft(data); }
+    const data = await loadFragranceById(id).catch(() => null);
+    setLeft(data);
     setLoading(l => ({ ...l, left: false }));
   }
 
-  async function selectRight(id: string, name: string) {
+  async function selectRight(id: string) {
     setLoading(l => ({ ...l, right: true }));
-    const data = await loadFragranceById(id);
+    const data = await loadFragranceById(id).catch(() => null);
     setRight(data);
     setLoading(l => ({ ...l, right: false }));
   }
